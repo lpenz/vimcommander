@@ -4,7 +4,7 @@
 " Author:  Leandro Penz
 " Date:    2003/11/01
 " Email:   lpenz AT terra DOT com DOT br
-" Version: $Id: vimcommander.vim,v 1.26 2003/11/08 04:21:39 lpenz Exp $
+" Version: $Id: vimcommander.vim,v 1.27 2003/11/08 04:40:13 lpenz Exp $
 "
 " Shameless using opsplorer.vim by Patrick Schiel.
 "
@@ -161,9 +161,11 @@ endf
 fu! <SID>InitCommanderColors()
 	sy clear
 	if s:use_colors
-		syntax match VimCommanderSelected '^\s*<\w.*>$'
+		syntax match VimCommanderSelectedFile '^\s*<\w.*>$'
+		syntax match VimCommanderSelectedDir '<\w.*>$' contained
 		syntax match VimCommanderPath "^/.*"
-		syntax match VimCommanderNode "^\s*[+-]"
+		syntax match VimCommanderDirLine "^[+-].*" transparent contains=VimCommanderSelectedDir,VimCommanderNode
+		syntax match VimCommanderNode "^[+-]" contained
 		syntax match VimCommanderFileLine "^\s*\w\w*.*$" transparent contains=ALL
 		syntax match VimCommanderFile "\w.*" contained
 		syntax match VimCommanderSource "^\s*\w\w*.*\.c$" contained
@@ -176,7 +178,8 @@ fu! <SID>InitCommanderColors()
 		hi link VimCommanderSource Question
 		hi link VimCommanderHeader Include
 		hi link VimCommanderSpecial Function
-		hi link VimCommanderSelected Visual
+		hi link VimCommanderSelectedFile Visual
+		hi link VimCommanderSelectedDir Visual
 	en
 endf
 
@@ -556,9 +559,29 @@ fu! <SID>SelectedNum(str,idx)
 endf
 
 fu! <SID>Select()
-	if <SID>NameUnderCursor() =~ "^<\w*.*>$" " deselected
+	let name=<SID>NameUnderCursor()
+	if  name =~ "^+*<\w*.*>$" " deselected
+		let name=strpart(name, 1, strlen(name)-2)
+		let tmp=""
+		let found=<SID>SelectedNum(b:vimcommander_selected, 0)
+		let i=1
+		while found!=""
+			if found!=name
+				if tmp!=""
+					let tmp=tmp.' '
+				end
+				let tmp=tmp.'<'.found.'>'
+				echo found." != ".name
+			end
+			let found=<SID>SelectedNum(b:vimcommander_selected, i)
+			let i=i+1
+		endwhile
+		let b:vimcommander_selected=tmp
 		setl ma
 		norm 1|g^
+		if getline(line('.'))[0]=='+'
+			norm l
+		end
 		norm x
 		norm $x
 		norm 1|g^
@@ -571,6 +594,10 @@ fu! <SID>Select()
 			let b:vimcommander_selected=b:vimcommander_selected." <".<SID>NameUnderCursor().">"
 		end
 		setl ma
+		norm ^
+		if getline(line('.'))[0]=='+'
+			norm l
+		end
 		norm i<
 		norm A>
 		setl noma
