@@ -4,7 +4,7 @@
 " Author:  Leandro Penz
 " Date:    2003/11/01
 " Email:   lpenz AT terra DOT com DOT br
-" Version: $Id: vimcommander.vim,v 1.29 2003/11/08 06:24:15 lpenz Exp $
+" Version: $Id: vimcommander.vim,v 1.30 2003/11/09 16:35:05 lpenz Exp $
 "
 " Shameless using opsplorer.vim by Patrick Schiel.
 "
@@ -164,7 +164,7 @@ endf
 fu! <SID>InitCommanderColors()
 	sy clear
 	if s:use_colors
-		syntax match VimCommanderSelectedFile '^\s*<\w.*>$'
+		syntax match VimCommanderSelectedFile '^\s*<.*>$'
 		syntax match VimCommanderSelectedDir '<\w.*>$' contained
 		syntax match VimCommanderPath "^/.*"
 		syntax match VimCommanderDirLine "^[+-].*" transparent contains=VimCommanderSelectedDir,VimCommanderNode
@@ -197,32 +197,25 @@ endf
 fu! <SID>GetPathName(xpos,ypos)
 	let xpos=a:xpos
 	let ypos=a:ypos
-	let line=getline(ypos)
 	" check for directory..
-	if getline(ypos)[xpos]=~"[+-]"
-		let line=strpart(line,xpos+1,col('$'))
-		let xpos=xpos-1
-	end
+	let line=getline(ypos)
 	" check selected
-	if line[0]=='<'
-		let line=strpart(line,1,strlen(line)-2)
+	if line=~"\s*<.*>$"
+		let xpos=xpos+1
 	end
+	if getline(ypos)[xpos]=~"[+-]"
+		let path=strpart(getline(ypos),xpos+1,col('$'))
+	el
+		" otherwise filename
+		let path=strpart(getline(ypos),xpos,col('$'))
+		let xpos=xpos-1
+	en
+	if line=~"\s*<.*>$"
+		let path=strpart(path, 0, strlen(path)-1)
+	end
+	let path='/'.path
 	" walk up tree and append subpaths
-	let row=ypos-1
-	let indent=xpos
-	wh indent>0
-		" look for prev ident level
-		let indent=indent-1
-		wh getline(row)[indent] != '-'
-			let row=row-1
-			if row == 0
-				retu ""
-			en
-		endw
-		" subpath found, append
-		let path='/'.strpart(getline(row),indent+1,strlen(getline(row))).path
-	endw 
-	" finally add base path
+	" add base path
 	" not needed, if in root
 	if getline(1)!='/'
 		let path=getline(1).path
@@ -236,7 +229,8 @@ fu! <SID>PathUnderCursor()
 	if ypos>1 "not on line 1
 		norm 1|g^
 		let xpos=col('.')-1
-		return <SID>GetPathName(xpos,ypos)
+		let rv=<SID>GetPathName(xpos,ypos)
+		return rv
 	end
 	return ""
 endf
@@ -373,6 +367,15 @@ fu! <SID>GetName(xpos,ypos)
 	retu path
 endf
 
+fu! <SID>FilenameUnderCursor()
+	norm 1|g^
+	let path=<SID>GetName(col('.')-1,line('.'))
+	if path=~"^<.*>$"
+		let path=strpart(path, 1, strlen(path)-2)
+	end
+	return path
+endf
+
 fu! <SID>NameUnderCursor()
 	norm 1|g^
 	return <SID>GetName(col('.')-1,line('.'))
@@ -388,7 +391,7 @@ fu! <SID>FileCopy()
 	else
 		let name=" "
 		let filename=<SID>PathUnderCursor()
-		let otherfilename=<SID>OtherPath().<SID>NameUnderCursor()
+		let otherfilename=<SID>OtherPath().<SID>FilenameUnderCursor()
 	end
 	while strlen(name)>0
 		if filereadable(filename) || isdirectory(filename)
@@ -438,7 +441,7 @@ fu! <SID>FileMove()
 	else
 		let name=" "
 		let filename=<SID>PathUnderCursor()
-		let otherfilename=<SID>OtherPath().<SID>NameUnderCursor()
+		let otherfilename=<SID>OtherPath().<SID>FilenameUnderCursor()
 	end
 	while strlen(name)>0
 		if filereadable(filename) || isdirectory(filename)
@@ -987,40 +990,6 @@ endf
 fu! <SID>CutFirstLine(text)
 	let pos=match(a:text,"\n")
 	retu strpart(a:text,pos+1,strlen(a:text))
-endf
-
-fu! <SID>GetPathName(xpos,ypos)
-	let xpos=a:xpos
-	let ypos=a:ypos
-	" check for directory..
-	if getline(ypos)[xpos]=~"[+-]"
-		let path='/'.strpart(getline(ypos),xpos+1,col('$'))
-	el
-		" otherwise filename
-		let path='/'.strpart(getline(ypos),xpos,col('$'))
-		let xpos=xpos-1
-	en
-	" walk up tree and append subpaths
-	let row=ypos-1
-	let indent=xpos
-	wh indent>0
-		" look for prev ident level
-		let indent=indent-1
-		wh getline(row)[indent] != '-'
-			let row=row-1
-			if row == 0
-				retu ""
-			en
-		endw
-		" subpath found, append
-		let path='/'.strpart(getline(row),indent+1,strlen(getline(row))).path
-	endw 
-	" finally add base path
-	" not needed, if in root
-	if getline(1)!='/'
-		let path=getline(1).path
-	en
-	retu path
 endf
 
 fu! <SID>SpaceString(width)
