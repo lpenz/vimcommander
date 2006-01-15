@@ -4,7 +4,7 @@
 " Author:  Leandro Penz
 " Date:    2003/11/01
 " Email:   lpenz AT terra DOT com DOT br
-" Version: $Id: vimcommander.vim,v 1.39 2003/11/13 01:22:46 lpenz Exp $
+" Version: $Id: vimcommander.vim,v 1.40 2003/11/15 12:31:18 lpenz Exp $
 "
 " Shameless using opsplorer.vim by Patrick Schiel.
 "
@@ -120,13 +120,9 @@ fu! <SID>VimCommanderShow()
 	"Goto vimcommander window
 	winc j
 	hide
-	let winnum = bufwinnr(g:lastside)
-	if winnum != -1
-		" Jump to the existing window
-		if winnr() != winnum
-			exe winnum . 'wincmd w'
-		endif
-	endif
+	if g:lastside=="VimCommanderRight"
+		cal <SID>SwitchBuffer()
+	end
 	norm z-
 	autocmd BufEnter    VimCommanderLeft  cal <SID>LeftBufEnter()
 	autocmd BufEnter    VimCommanderRight cal <SID>RightBufEnter()
