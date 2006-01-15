@@ -1,4 +1,4 @@
-"$Id: vimcommander.vim,v 1.47 2003/11/17 01:11:56 lpenz Exp $
+"$Id: vimcommander.vim,v 1.48 2003/11/17 01:54:01 lpenz Exp $
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Name:         vimcommander
 " Description:  total-commander-like file manager for vim.
@@ -117,11 +117,11 @@ fu! <SID>VimCommanderShow()
 		return
 	end
 	"close all windows
-	let s:orig_buffer=bufname("")
-	let v:errmsg=''
-	while v:errmsg==''
-		silent! close
-	endwhile
+	let s:buffer_to_load=bufname("")
+	"let v:errmsg=''
+	"while v:errmsg==''
+	"	silent! close
+	"endwhile
 	"reset aucmd
 	autocmd! BufEnter VimCommanderLeft
 	autocmd! BufEnter VimCommanderRight
@@ -148,6 +148,13 @@ fu! <SID>VimCommanderShow()
 	"Goto vimcommander window
 	winc j
 	hide
+	let winnum = bufwinnr(s:bufnr_left)
+	if winnum != -1
+		" Jump to the existing window
+		if winnr() != winnum
+			exe winnum . 'wincmd w'
+		endif
+	endif
 	if g:lastside=="VimCommanderRight"
 		cal <SID>SwitchBuffer()
 	end
@@ -195,14 +202,16 @@ fu! <SID>Close()
 		endif
 	endif
 	let s:line_right=line('.')
-	silent! close
+	"silent! close
 	let g:vimcommander_loaded=0
-	if bufwinnr(s:bufnr_right)!=-1
-		exe "new +buffer ".s:orig_buffer
-		cal <SID>LoadOpts()
-		exe 'wincmd w'
-		close
-	end
+	exe "edit +buffer ".s:buffer_to_load
+	cal <SID>LoadOpts()
+	"if bufwinnr(s:bufnr_right)!=-1
+	"	exe "new +buffer ".s:buffer_to_load
+	"	cal <SID>LoadOpts()
+	"	exe 'wincmd w'
+	"	close
+	"end
 endf
 
 fu! <SID>SaveOpts()
@@ -296,8 +305,8 @@ endf
 
 fu! <SID>ProvideBuffer()
 	"winc j
-	new
-	cal <SID>LoadOpts()
+	"new
+	"cal <SID>LoadOpts()
 endf
 
 fu! <SID>FileView()
@@ -305,11 +314,12 @@ fu! <SID>FileView()
 	if(isdirectory(path))
 		return
 	end
-	cal <SID>ProvideBuffer()
-	exe "edit ".path
+	"cal <SID>ProvideBuffer()
+	"exe "edit ".path
+	let s:buffer_to_load=path
+	cal <SID>Close()
 	setl noma
 	setl ro
-	cal <SID>Close()
 endf
 
 fu! <SID>FileEdit()
@@ -317,11 +327,12 @@ fu! <SID>FileEdit()
 	if(isdirectory(path))
 		return
 	end
-	cal <SID>ProvideBuffer()
-	exe "edit ".path
+	"cal <SID>ProvideBuffer()
+	"exe "edit ".path
+	let s:buffer_to_load=path
+	cal <SID>Close()
 	setl ma
 	setl noro
-	cal <SID>Close()
 endf
 
 fu! <SID>NewFileEdit()
@@ -338,11 +349,12 @@ fu! <SID>NewFileEdit()
 		echo "Unable to edit file: directory with same name exists"
 		return
 	end
-	cal <SID>ProvideBuffer()
-	exe "edit ".newfile
+	"cal <SID>ProvideBuffer()
+	"exe "edit ".newfile
+	let s:buffer_to_load=path
+	cal <SID>Close()
 	setlocal ma
 	setlocal noro
-	cal <SID>Close()
 endf
 
 fu! <SID>MyPath()
@@ -1169,7 +1181,7 @@ fu! <SID>SpellInstallDocumentation(full_name, revision)
 endf
 
 let s:revision=
-			\ substitute("$Revision: 1.47 $",'\$\S*: \([.0-9]\+\) \$','\1','')
+			\ substitute("$Revision: 1.48 $",'\$\S*: \([.0-9]\+\) \$','\1','')
 silent! let s:install_status =
 			\ <SID>SpellInstallDocumentation(expand('<sfile>:p'), s:revision)
 if (s:install_status == 1)
