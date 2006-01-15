@@ -3,11 +3,9 @@
 " Author:  Leandro Penz
 " Date:    2003/11/01
 " Email:   lpenz AT terra DOT com DOT br
-" Version: $Id: vimcommander.vim,v 1.23 2003/11/07 15:16:57 lpenz Exp $
+" Version: $Id: vimcommander.vim,v 1.24 2003/11/07 15:20:44 lpenz Exp $
 "
 " Shameless using opsplorer.vim by Patrick Schiel.
-"
-" vim: fdm=marker foldmarker=fu!,endf
 "
 
 
@@ -33,15 +31,15 @@ fu! <SID>CommanderMappings()
     noremap <silent> <buffer> <S-Left>  :cal <SID>GetOrPutDir('l')<CR>
     noremap <silent> <buffer> <S-Right> :cal <SID>GetOrPutDir('r')<CR>
     noremap <silent> <buffer> <M-O>     :cal <SID>PutDir()<CR>
-
     noremap <silent> <buffer> <F5>      :cal <SID>FileCopy()<CR>
     noremap <silent> <buffer> <F6>      :cal <SID>FileMove()<CR>
     noremap <silent> <buffer> <F8>      :cal <SID>FileDelete()<CR>
     noremap <silent> <buffer> <DEL>     :cal <SID>FileDelete()<CR>
-    noremap <silent> <buffer> <F10>     :cal <SID>Close()<CR>
-    noremap <silent> <buffer> <C-F11>   :cal <SID>SetMatchPattern()<CR>
     noremap <silent> <buffer> <C-U>     :cal <SID>ExchangeDirs()<CR>
     noremap <silent> <buffer> <C-R>     :cal <SID>RefreshDisplays()<CR>
+
+    noremap <silent> <buffer> <F10>     :cal <SID>Close()<CR>
+    noremap <silent> <buffer> <C-F11>   :cal <SID>SetMatchPattern()<CR>
     noremap <silent> <buffer> <C-O>     :cal VimCommanderToggle()<CR>
 
     noremap <silent> <buffer> <F11> :cal VimCommanderToggle()<CR>
@@ -307,14 +305,15 @@ fu! <SID>DirCreate()
 endf
 
 fu! <SID>InitCommanderOptions()
-	setlocal noscrollbind
-	setlocal nowrap
-	setlocal nonu
+	silent! setlocal noscrollbind
+	silent! setlocal nowrap
+	silent! setlocal nonu
 	silent! setlocal buftype=nofile
 	silent! setlocal bufhidden=delete
 	silent! setlocal noswapfile
 	silent! setlocal nobuflisted
 	silent! setlocal nonumber
+	silent! setlocal incsearch
 endf
 
 fu! <SID>InitCommanderColors()
@@ -450,9 +449,19 @@ fu! <SID>GetOrPutDir(dir)
 	call <SID>PutDir()
 endf
 
-"=============================================================================
+fu! <SID>ExchangeDirs()
+	let pathtmp=s:path_left
+	let s:path_left=s:path_right
+	let s:path_right=pathtmp
+	let myline=line('.')
+	cal <SID>BuildTree(<SID>MyPath())
+	cal <SID>SwitchBuffer()
+	cal <SID>BuildTree(<SID>MyPath())
+	exec myline
+	cal <SID>RefreshDisplays()
+endf
 
-
+"== From Opsplorer: ==========================================================
 
 fu! <SID>InitOptions()
 	let s:single_click_to_edit=0
@@ -488,18 +497,6 @@ fu! <SID>FileSee()
 	if filereadable(filename)
 		let i=system("see ".filename."&")
 	en
-endf
-
-fu! <SID>ExchangeDirs()
-	let pathtmp=s:path_left
-	let s:path_left=s:path_right
-	let s:path_right=pathtmp
-	let myline=line('.')
-	cal <SID>BuildTree(<SID>MyPath())
-	cal <SID>SwitchBuffer()
-	cal <SID>BuildTree(<SID>MyPath())
-	exec myline
-	cal <SID>RefreshDisplays()
 endf
 
 fu! <SID>BuildParentTree()
