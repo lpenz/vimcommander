@@ -1,4 +1,4 @@
-"$Id: vimcommander.vim,v 1.54 2003/11/19 22:16:02 lpenz Exp $
+"$Id: vimcommander.vim,v 1.54.2.1 2004/01/25 17:14:31 lpenz Exp $
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Name:         vimcommander
 " Description:  total-commander-like file manager for vim.
@@ -16,6 +16,8 @@
 "               Mathieu Clabaut <mathieu.clabaut@free.fr>, the author of
 "                    vimspell, from where I got how to autogenerate the 
 "                    help from within the script.
+"               Diego Morales, for the patch that was really just to get his
+"                    name here. :)
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Section: Documentation 
 "
@@ -23,7 +25,7 @@
 " script has been copied in you .vim/plugin directory.
 "
 " If you do not want the documentation to be installed, just put
-" let b:vimcommander_install_doc=1
+" let b:vimcommander_install_doc=0
 " in your .vimrc, or uncomment the line above.
 "
 " The documentation is still available at the end of the script.
@@ -72,6 +74,8 @@ fu! <SID>CommanderMappings()
 	noremap <silent> <buffer> <leader>u        :cal <SID>ExchangeDirs()<CR>
 	noremap <silent> <buffer> <C-R>            :cal <SID>RefreshDisplays()<CR>
 	noremap <silent> <buffer> <leader>r        :cal <SID>RefreshDisplays()<CR>
+	noremap <silent> <buffer> <C-H>            :cal <SID>ShowHiddenFilesToggle()<CR>
+	noremap <silent> <buffer> <leader>h        :cal <SID>ShowHiddenFilesToggle()<CR>
 	"File-selection
 	noremap <silent> <buffer> <Insert>         :cal <SID>Select()<CR>
 	noremap <silent> <buffer> <C-kPlus>        :cal <SID>SelectPattern('*')<CR>
@@ -902,6 +906,15 @@ fu! <SID>NextDir()
 	end
 endf
 
+fu! <SID>ShowHiddenFilesToggle()
+	if (s:show_hidden_files==0)
+		let s:show_hidden_files=1
+	el
+		let s:show_hidden_files=0
+	en
+	cal <SID>RefreshDisplays()
+endf
+
 "== From Opsplorer: ==========================================================
 
 fu! <SID>InitOptions()
@@ -1191,7 +1204,7 @@ if exists("b:vimcommander_install_doc") && b:vimcommander_install_doc==0
 end
 
 let s:revision=
-			\ substitute("$Revision: 1.54 $",'\$\S*: \([.0-9]\+\) \$','\1','')
+			\ substitute("$Revision: 1.54.2.1 $",'\$\S*: \([.0-9]\+\) \$','\1','')
 silent! let s:install_status =
 			\ <SID>SpellInstallDocumentation(expand('<sfile>:p'), s:revision)
 if (s:install_status == 1)
@@ -1279,6 +1292,7 @@ CONTENT                                                *vimcommander-contents*
     - C-Left  = Put directory under cursor on other panel, or grab
               = other panel's dir;
     - C-Right = Same;
+    - C-H     = Toggle show hidden files;
     - INS     = Select file under cursor;
     - "+"     = Select file by pattern;
     - "-"     = De-select file by pattern;
