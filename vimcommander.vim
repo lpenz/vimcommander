@@ -4,13 +4,14 @@
 " Author:  Leandro Penz
 " Date:    2003/11/01
 " Email:   lpenz AT terra DOT com DOT br
-" Version: $Id: vimcommander.vim,v 1.31 2003/11/09 16:47:51 lpenz Exp $
+" Version: $Id: vimcommander.vim,v 1.32 2003/11/09 16:53:16 lpenz Exp $
 "
 " Shameless using opsplorer.vim by Patrick Schiel.
 "
 
 
 fu! <SID>CommanderMappings()
+	"opsplorer legacy:
 	noremap <silent> <buffer> <LeftRelease> :cal <SID>OnClick()<CR>
 	noremap <silent> <buffer> <2-LeftMouse> :cal <SID>OnDoubleClick(-1)<CR>
 	noremap <silent> <buffer> <Space> :cal <SID>OnDoubleClick(0)<CR>
@@ -115,8 +116,10 @@ fu! <SID>VimCommanderShow()
 		endif
 	endif
 	norm z-
-	autocmd BufEnter VimCommanderLeft let g:lastside="VimCommanderLeft"
-	autocmd BufEnter VimCommanderRight let g:lastside="VimCommanderRight"
+	autocmd BufEnter    VimCommanderLeft  let g:lastside="VimCommanderLeft"
+	autocmd BufEnter    VimCommanderRight let g:lastside="VimCommanderRight"
+	autocmd BufWinLeave VimCommanderLeft  cal VimCommanderToggle()
+	autocmd BufWinLeave VimCommanderRight cal VimCommanderToggle()
 endf
 
 fu! <SID>Close()
