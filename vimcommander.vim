@@ -3,7 +3,7 @@
 " Author:  Leandro Penz
 " Date:    2003/11/01
 " Email:   lpenz AT terra DOT com DOT br
-" Version: $Id: vimcommander.vim,v 1.19 2003/11/07 13:21:32 lpenz Exp $
+" Version: $Id: vimcommander.vim,v 1.20 2003/11/07 14:07:34 lpenz Exp $
 "
 " Shameless using opsplorer.vim by Patrick Schiel.
 "
@@ -71,6 +71,13 @@ fu! <SID>VimCommanderShow()
 	if exists("g:vimcommander_loaded") && g:vimcommander_loaded==1 " on screen
 		return
 	end
+	"close all windows
+	let s:orig_buffer=bufname("")
+	let v:errmsg=''
+	while v:errmsg==''
+		silent! close
+	endwhile
+	"reset aucmd
 	autocmd! BufEnter VimCommanderLeft
 	autocmd! BufEnter VimCommanderRight
 	" create new window
@@ -117,7 +124,7 @@ fu! <SID>Close()
 		endif
 	endif
 	let s:line_left=line('.')
-	close
+	silent! close
 	let winnum = bufwinnr("VimCommanderRight")
 	if winnum != -1
 		" Jump to the existing window
@@ -126,8 +133,13 @@ fu! <SID>Close()
 		endif
 	endif
 	let s:line_right=line('.')
-	close
+	silent! close
 	let g:vimcommander_loaded=0
+	if bufwinnr("VimCommanderRight")!=-1
+		exe "new +buffer ".s:orig_buffer
+		exe 'wincmd w'
+		close
+	end
 endf
 
 fu! <SID>SwitchBuffer()
