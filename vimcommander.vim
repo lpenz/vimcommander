@@ -3,26 +3,64 @@
 " Author:  Leandro Penz
 " Date:    2003/11/01
 " Email:   lpenz AT terra DOT com DOT br
-" Version: $Id: vimcommander.vim,v 1.17 2003/11/07 23:11:11 lpenz Exp $
+" Version: $Id: vimcommander.vim,v 1.18 2003/11/08 14:34:50 lpenz Exp $
 "
 " Shameless using opsplorer.vim by Patrick Schiel.
 "
 
-" setup command
-com! -nargs=* -complete=dir VimCommander cal VimCommander(<f-args>)
+fu! <SID>CommanderInitMappings()
+	noremap <silent> <buffer> <LeftRelease> :cal <SID>OnClick()<CR>
+	noremap <silent> <buffer> <2-LeftMouse> :cal <SID>OnDoubleClick(-1)<CR>
+	noremap <silent> <buffer> <Space> :cal <SID>OnDoubleClick(0)<CR>
+	noremap <silent> <buffer> <CR> :cal <SID>OnDoubleClick(1)<CR>
+	noremap <silent> <buffer> <Down> :cal <SID>GotoNextEntry()<CR>
+	noremap <silent> <buffer> <Up> :cal <SID>GotoPrevEntry()<CR>
+	noremap <silent> <buffer> <S-Down> :cal <SID>GotoNextNode()<CR>
+	noremap <silent> <buffer> <S-Up> :cal <SID>GotoPrevNode()<CR>
+	noremap <silent> <buffer> <BS> :cal <SID>BuildParentTree()<CR>
+	"total-cmd keys:
+	noremap <silent> <buffer> <TAB> :cal <SID>SwitchBuffer()<CR>
+	noremap <silent> <buffer> <DEL> :cal <SID>FileDelete()<CR>
+	noremap <silent> <buffer> <F3> :cal <SID>OnDoubleClick(2)<CR>
+	noremap <silent> <buffer> <F4> :cal <SID>OnDoubleClick(1)<CR>
+	noremap <silent> <buffer> <F5> :cal <SID>FileCopy()<CR>
+	noremap <silent> <buffer> <F6> :cal <SID>FileMove()<CR>
+	noremap <silent> <buffer> <F7> :cal <SID>DirCreate()<CR>
+	noremap <silent> <buffer> <F10> :cal <SID>CloseExplorer()<CR>
+	noremap <silent> <buffer> <F11> :cal ToggleShowVimCommander()<CR>
+	noremap <silent> <buffer> <C-F11> :cal <SID>SetMatchPattern()<CR>
+	noremap <silent> <buffer> <C-U> :cal <SID>ExchangeDirs()<CR>
+	noremap <silent> <buffer> <C-R> :cal <SID>RefreshDisplays()<CR>
+	noremap <silent> <buffer> <C-Left> :cal <SID>PutDir(0)<CR>
+	noremap <silent> <buffer> <C-Right> :cal <SID>PutDir(1)<CR>
+endf
 
 fu! ToggleShowVimCommander()
 	if exists("g:vimcommander_loaded")
 		if(g:vimcommander_loaded==1) " its on screen
-			exe s:window_bufnrleft."bd"
-			exe s:window_bufnrright."bd"
+			let winnum = bufwinnr("VimCommanderLeft")
+			if winnum != -1
+				" Jump to the existing window
+				if winnr() != winnum
+					exe winnum . 'wincmd w'
+				endif
+			endif
+			close
+			let winnum = bufwinnr("VimCommanderRight")
+			if winnum != -1
+				" Jump to the existing window
+				if winnr() != winnum
+					exe winnum . 'wincmd w'
+				endif
+			endif
+			close
 			let g:vimcommander_loaded=0
 		el
-			cal VimCommander()
+			cal VimCommanderReload()
 		end
 	el
-		let g:vimcommander_leftpath=getcwd()
-		let g:vimcommander_rightpath=getcwd()
+		let s:vimcommander_leftpath=getcwd()
+		let s:vimcommander_rightpath=getcwd()
 		cal VimCommander()
 	en
 endf
@@ -41,6 +79,24 @@ fu! GotoVimCommander()
 	en
 endf
 
+fu! VimCommanderReload()
+	" setup options
+	cal <SID>InitOptions()
+	" create new window
+	let winsize=&lines/2
+	exe winsize." split +buffer "."VimCommanderLeft"
+	let s:window_bufnrleft=winbufnr(0)
+	" setup mappings, apply options, colors and draw tree
+	exe "vs +buffer "."VimCommanderRight"
+	let s:window_bufnrright=winbufnr(0)
+	let g:vimcommander_lastwindow="VimCommanderLeft"
+	let g:vimcommander_loaded=1
+endf
+
+fu! <SID>SaveOpts()
+	
+endf
+
 fu! VimCommander()
 	" setup options
 	cal <SID>InitOptions()
@@ -50,16 +106,16 @@ fu! VimCommander()
 	let s:window_bufnrleft=winbufnr(0)
 	" setup mappings, apply options, colors and draw tree
 	cal <SID>InitCommonOptions()
-	cal <SID>InitMappings()
+	cal <SID><CommanderInitMappings>()
 	cal <SID>InitColors()
-	cal <SID>BuildTree(g:vimcommander_leftpath)
+	cal <SID>BuildTree(s:vimcommander_leftpath)
 	exe "vs VimCommanderLeft"
 	let s:window_bufnrright=winbufnr(0)
 	let g:vimcommander_lastwindow="VimCommanderLeft"
 	cal <SID>InitCommonOptions()
-	cal <SID>InitMappings()
+	cal <SID><CommanderInitMappings>()
 	cal <SID>InitColors()
-	cal <SID>BuildTree(g:vimcommander_rightpath)
+	cal <SID>BuildTree(s:vimcommander_rightpath)
 	let g:vimcommander_loaded=1
 	autocmd BufEnter VimCommanderLeft let g:vimcommander_lastwindow="VimCommanderLeft"
 	autocmd BufEnter VimCommanderRight let g:vimcommander_lastwindow="VimCommanderRight"
@@ -68,18 +124,18 @@ endf
 fu! <SID>MyPath()
 	let thisbuff=winbufnr(0)
 	if thisbuff == s:window_bufnrleft
-		return g:vimcommander_leftpath."/"
+		return s:vimcommander_leftpath."/"
 	else
-		return g:vimcommander_rightpath."/"
+		return s:vimcommander_rightpath."/"
 	en
 endf
 
 fu! <SID>OtherPath()
 	let thisbuff=winbufnr(0)
 	if thisbuff == s:window_bufnrleft
-		return g:vimcommander_rightpath."/"
+		return s:vimcommander_rightpath."/"
 	else
-		return g:vimcommander_leftpath."/"
+		return s:vimcommander_leftpath."/"
 	en
 endf
 
@@ -114,50 +170,15 @@ fu! <SID>InitOptions()
 	let s:close_explorer_after_open=0
 endf
 
-fu! <SID>InitMappings()
-	noremap <silent> <buffer> <LeftRelease> :cal <SID>OnClick()<CR>
-	noremap <silent> <buffer> <2-LeftMouse> :cal <SID>OnDoubleClick(-1)<CR>
-	noremap <silent> <buffer> <Space> :cal <SID>OnDoubleClick(0)<CR>
-	noremap <silent> <buffer> <CR> :cal <SID>OnDoubleClick(1)<CR>
-	noremap <silent> <buffer> <Down> :cal <SID>GotoNextEntry()<CR>
-	noremap <silent> <buffer> <Up> :cal <SID>GotoPrevEntry()<CR>
-	noremap <silent> <buffer> <S-Down> :cal <SID>GotoNextNode()<CR>
-	noremap <silent> <buffer> <S-Up> :cal <SID>GotoPrevNode()<CR>
-	noremap <silent> <buffer> <BS> :cal <SID>BuildParentTree()<CR>
-	"noremap <silent> <buffer> n :cal <SID>InsertFilename()<CR>
-	"noremap <silent> <buffer> p :cal <SID>InsertFileContent()<CR>
-	"noremap <silent> <buffer> s :cal <SID>FileSee()<CR>
-	"noremap <silent> <buffer> N :cal <SID>FileRename()<CR>
-	"noremap <silent> <buffer> D :cal <SID>FileDelete()<CR>
-	"noremap <silent> <buffer> C :cal <SID>FileCopy()<CR>
-	"noremap <silent> <buffer> O :cal <SID>FileMove()<CR>
-	"noremap <silent> <buffer> H :cal <SID>ToggleShowHidden()<CR>
-	"total-cmd keys:
-	noremap <silent> <buffer> <TAB> :cal <SID>SwitchBuffer()<CR>
-	noremap <silent> <buffer> <DEL> :cal <SID>FileDelete()<CR>
-	noremap <silent> <buffer> <F3> :cal <SID>OnDoubleClick(2)<CR>
-	noremap <silent> <buffer> <F4> :cal <SID>OnDoubleClick(1)<CR>
-	noremap <silent> <buffer> <F5> :cal <SID>FileCopy()<CR>
-	noremap <silent> <buffer> <F6> :cal <SID>FileMove()<CR>
-	noremap <silent> <buffer> <F7> :cal <SID>DirCreate()<CR>
-	noremap <silent> <buffer> <F10> :cal <SID>CloseExplorer()<CR>
-	noremap <silent> <buffer> <F11> :cal ToggleShowVimCommander()<CR>
-	noremap <silent> <buffer> <C-F11> :cal <SID>SetMatchPattern()<CR>
-	noremap <silent> <buffer> <C-U> :cal <SID>ExchangeDirs()<CR>
-	noremap <silent> <buffer> <C-R> :cal <SID>RefreshDisplays()<CR>
-	noremap <silent> <buffer> <C-Left> :cal <SID>PutDir(0)<CR>
-	noremap <silent> <buffer> <C-Right> :cal <SID>PutDir(1)<CR>
-endf
-
 fu! <SID>InitCommonOptions()
 	setl noscrollbind
 	setl nowrap
 	setl nonu
-    silent! setlocal buftype=nofile
-    silent! setlocal bufhidden=delete
-    silent! setlocal noswapfile
+	silent! setlocal buftype=nofile
+	silent! setlocal bufhidden=delete
+	silent! setlocal noswapfile
 	silent! setlocal nobuflisted
-    silent! setlocal nonumber
+	silent! setlocal nonumber
 endf
 
 fu! <SID>InitColors()
@@ -209,7 +230,7 @@ fu! <SID>Opsplore(...)
 	let s:window_bufnr=winbufnr(0)
 	" setup mappings, apply options, colors and draw tree
 	cal <SID>InitCommonOptions()
-	cal <SID>InitMappings()
+	cal <SID><CommanderInitMappings>()
 	cal <SID>InitColors()
 	cal <SID>BuildTree(path)
 	let g:opsplorer_loaded=1
@@ -240,9 +261,9 @@ fu! <SID>BuildTree(path)
 		let path=strpart(path,0,strlen(path)-1)
 	en
 	if(winbufnr(0)==s:window_bufnrleft)
-		let g:vimcommander_leftpath=path
+		let s:vimcommander_leftpath=path
 	else
-		let g:vimcommander_rightpath=path
+		let s:vimcommander_rightpath=path
 	end
 	cal setline(1,path)
 	setl noma nomod
@@ -336,9 +357,9 @@ fu! <SID>PutDir(dir)
 endf
 
 fu! <SID>ExchangeDirs()
-	let pathtmp=g:vimcommander_leftpath
-	let g:vimcommander_leftpath=g:vimcommander_rightpath
-	let g:vimcommander_rightpath=pathtmp
+	let pathtmp=s:vimcommander_leftpath
+	let s:vimcommander_leftpath=s:vimcommander_rightpath
+	let s:vimcommander_rightpath=pathtmp
 	let myline=line('.')
 	cal <SID>BuildTree(<SID>MyPath())
 	cal <SID>SwitchBuffer()
@@ -512,55 +533,55 @@ fu! <SID>OnDoubleClick(close_explorer)
 	"if <SID>IsTreeNode(xpos,ypos)
 	"	cal <SID>TreeNodeAction(xpos,ypos)
 	"el
-		" go to first non-blank when line>1
-		if ypos>1
-			norm 1|g^
-			let xpos=col('.')-1
-			" check, if it's a directory
-			let path=<SID>GetPathName(xpos,ypos)
-			if isdirectory(path)
-				" build new root structure
-				cal <SID>BuildTree(path)
-				"exe "cd ".getline(1)
-			el
-				" try to resolve filename
-				" and open in other window
-				let path=<SID>GetPathName(xpos,ypos)
-				if filereadable(path)
-					" go to last accessed buffer
-					winc j
-					" append sequence for opening file
-					"exe "cd ".fnamemodify(path,":h")
-					exe "e ".path
-					if s:close_explorer==2 "eh view
-						setl noma
-						setl ro
-					else
-						setl ma
-						setl noro
-					end
-				en
-				if s:close_explorer==1
-					cal ToggleShowVimCommander()
-				en
-			en
+	" go to first non-blank when line>1
+	if ypos>1
+		norm 1|g^
+		let xpos=col('.')-1
+		" check, if it's a directory
+		let path=<SID>GetPathName(xpos,ypos)
+		if isdirectory(path)
+			" build new root structure
+			cal <SID>BuildTree(path)
+			"exe "cd ".getline(1)
 		el
-			" we're on line 1 here! getting new base path now...
-			" advance to next slash
-			if getline(1)[xpos]!="/"
-				norm f/
-				" no next slash -> current directory, just rebuild
-				if col('.')-1==xpos
-					cal <SID>BuildTree(getline(1))
-					"exe "cd ".getline(1)
-					retu
-				en
+			" try to resolve filename
+			" and open in other window
+			let path=<SID>GetPathName(xpos,ypos)
+			if filereadable(path)
+				" go to last accessed buffer
+				winc j
+				" append sequence for opening file
+				"exe "cd ".fnamemodify(path,":h")
+				exe "e ".path
+				if s:close_explorer==2 "eh view
+					setl noma
+					setl ro
+				else
+					setl ma
+					setl noro
+				end
 			en
-			" cut ending slash
-			norm h
-			" rebuild tree with new path
-			cal <SID>BuildTree(strpart(getline(1),0,col('.')))
+			if s:close_explorer==1
+				cal ToggleShowVimCommander()
+			en
 		en
+	el
+		" we're on line 1 here! getting new base path now...
+		" advance to next slash
+		if getline(1)[xpos]!="/"
+			norm f/
+			" no next slash -> current directory, just rebuild
+			if col('.')-1==xpos
+				cal <SID>BuildTree(getline(1))
+				"exe "cd ".getline(1)
+				retu
+			en
+		en
+		" cut ending slash
+		norm h
+		" rebuild tree with new path
+		cal <SID>BuildTree(strpart(getline(1),0,col('.')))
+	en
 	"en
 endf
 
@@ -765,3 +786,4 @@ fu! <SID>SpaceString(width)
 	retu spacer
 endf
 
+" vim: fdm=marker foldmarker=fu!,endf
