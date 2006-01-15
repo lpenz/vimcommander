@@ -4,7 +4,7 @@
 " Author:  Leandro Penz
 " Date:    2003/11/01
 " Email:   lpenz AT terra DOT com DOT br
-" Version: $Id: vimcommander.vim,v 1.28 2003/11/08 05:36:20 lpenz Exp $
+" Version: $Id: vimcommander.vim,v 1.29 2003/11/08 06:24:15 lpenz Exp $
 "
 " Shameless using opsplorer.vim by Patrick Schiel.
 "
@@ -528,7 +528,14 @@ fu! <SID>GetOrPutDir(dir)
 		return
 	end
 	" Crossed - putdir
-	call <SID>PutDir()
+	let path=<SID>PathUnderCursor()
+	if !isdirectory(path)
+		return
+	end
+	cal <SID>SwitchBuffer()
+	cal <SID>BuildTree(path)
+	cal <SID>SwitchBuffer()
+	cal <SID>RefreshDisplays()
 endf
 
 fu! <SID>ExchangeDirs()
