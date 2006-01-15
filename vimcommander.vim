@@ -3,7 +3,7 @@
 " Author:  Leandro Penz
 " Date:    2003/11/01
 " Email:   lpenz AT terra DOT com DOT br
-" Version: $Id: vimcommander.vim,v 1.12 2003/11/07 01:16:31 lpenz Exp $
+" Version: $Id: vimcommander.vim,v 1.13 2003/11/07 01:37:57 lpenz Exp $
 "
 " Shameless using opsplorer.vim by Patrick Schiel.
 "
@@ -23,11 +23,13 @@ endf
 
 fu! GotoVimCommander()
 	if exists("g:vimcommander_loaded")
-		let winnum=g:vimcommander_lastwindow
-		exe winnum."wincmd w"
-        if winnr() != winnum
-            exe winnum . 'wincmd w'
-        endif
+		let winnum = bufwinnr(g:vimcommander_lastwindow)
+		if winnum != -1
+			" Jump to the existing window
+			if winnr() != winnum
+				exe winnum . 'wincmd w'
+			endif
+		endif
 	el
 		cal VimCommander()
 	en
@@ -53,16 +55,17 @@ fu! VimCommander(...)
 	" setup options
 	cal <SID>InitOptions()
 	" create new window
-	new
+	let winsize=&lines/2
+	exe winsize." split VimCommanderRight"
 	let s:window_bufnrleft=winbufnr(0)
 	" setup mappings, apply options, colors and draw tree
 	cal <SID>InitCommonOptions()
 	cal <SID>InitMappings()
 	cal <SID>InitColors()
 	cal <SID>BuildTree(path)
-	vne
+	exe "vs VimCommanderLeft"
 	let s:window_bufnrright=winbufnr(0)
-	let g:vimcommander_lastwindow=winbufnr(0)
+	let g:vimcommander_lastwindow="VimCommanderLeft"
 	cal <SID>InitCommonOptions()
 	cal <SID>InitMappings()
 	cal <SID>InitColors()
@@ -70,16 +73,18 @@ fu! VimCommander(...)
 	let g:vimcommander_loaded=1
 endf
 
-fu! <SID>MyPath(thisbuff)
-	if a:thisbuff == s:window_bufnrleft
+fu! <SID>MyPath()
+	let thisbuff=winbufnr(0)
+	if thisbuff == s:window_bufnrleft
 		return s:pathleft."/"
 	else
 		return s:pathright."/"
 	en
 endf
 
-fu! <SID>OtherPath(thisbuff)
-	if a:thisbuff == s:window_bufnrleft
+fu! <SID>OtherPath()
+	let thisbuff=winbufnr(0)
+	if thisbuff == s:window_bufnrleft
 		return s:pathright."/"
 	else
 		return s:pathleft."/"
@@ -318,9 +323,9 @@ fu! <SID>ExchangeDirs()
 	let s:pathleft=s:pathright
 	let s:pathright=pathtmp
 	let myline=line('.')
-	cal <SID>BuildTree(<SID>MyPath(winbufnr(0)))
+	cal <SID>BuildTree(<SID>MyPath())
 	cal <SID>SwitchBuffer()
-	cal <SID>BuildTree(<SID>MyPath(winbufnr(0)))
+	cal <SID>BuildTree(<SID>MyPath())
 	exec myline
 	cal <SID>RefreshDisplays()
 endf
@@ -328,7 +333,7 @@ endf
 fu! <SID>FileMove()
 	norm 1|g^
 	let filename=<SID>GetPathName(col('.')-1,line('.'))
-	let otherfilename=<SID>OtherPath(winbufnr(0)).<SID>GetName(col('.')-1,line('.'))
+	let otherfilename=<SID>OtherPath().<SID>GetName(col('.')-1,line('.'))
 	if filereadable(filename)
 		let newfilename=input("Move to: ",otherfilename)
 		if filereadable(newfilename)
@@ -347,7 +352,7 @@ endf
 fu! <SID>FileCopy()
 	norm 1|g^
 	let filename=<SID>GetPathName(col('.')-1,line('.'))
-	let otherfilename=<SID>OtherPath(winbufnr(0)).<SID>GetName(col('.')-1,line('.'))
+	let otherfilename=<SID>OtherPath().<SID>GetName(col('.')-1,line('.'))
 	if filereadable(filename)
 		let newfilename=input("Copy to: ",otherfilename)
 		if filereadable(newfilename)
