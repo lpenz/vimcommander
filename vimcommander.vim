@@ -1,4 +1,4 @@
-"$Id: vimcommander.vim,v 1.46 2003/11/16 22:58:40 lpenz Exp $
+"$Id: vimcommander.vim,v 1.47 2003/11/17 01:11:56 lpenz Exp $
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Name:         vimcommander
 " Description:  total-commander-like file manager for vim.
@@ -40,11 +40,22 @@ fu! <SID>CommanderMappings()
 
 	"total-cmd keys:
 	noremap <silent> <buffer> <TAB>            :cal <SID>SwitchBuffer()<CR>
+	noremap <silent> <buffer> <C-\>            :cal <SID>BuildTree("$HOME")<CR>
+	noremap <silent> <buffer> <C-/>            :cal <SID>BuildTree("/")<CR>
+	noremap <silent> <buffer> <leader>/        :cal <SID>BuildTree("/")<CR>
+	"F-keys and aliases:
 	noremap <silent> <buffer> <F3>             :cal <SID>FileView()<CR>
 	noremap <silent> <buffer> <F4>             :cal <SID>FileEdit()<CR>
 	noremap <silent> <buffer> <S-F4>           :cal <SID>NewFileEdit()<CR>
 	noremap <silent> <buffer> <leader><F4>     :cal <SID>NewFileEdit()<CR>
+	noremap <silent> <buffer> <F5>             :cal <SID>FileCopy()<CR>
+	noremap <silent> <buffer> <F6>             :cal <SID>FileMove()<CR>
 	noremap <silent> <buffer> <F7>             :cal <SID>DirCreate()<CR>
+	noremap <silent> <buffer> <F8>             :cal <SID>FileDelete()<CR>
+	noremap <silent> <buffer> <DEL>            :cal <SID>FileDelete()<CR>
+	noremap <silent> <buffer> <F10>            :cal VimCommanderToggle()<CR>
+	noremap <silent> <buffer> <F11>            :cal VimCommanderToggle()<CR>
+	"Panel-dirs
 	noremap <silent> <buffer> <leader><Left>   :cal <SID>GetOrPutDir('l')<CR>
 	noremap <silent> <buffer> <leader><Right>  :cal <SID>GetOrPutDir('r')<CR>
 	noremap <silent> <buffer> <C-Left>         :cal <SID>GetOrPutDir('l')<CR>
@@ -53,23 +64,24 @@ fu! <SID>CommanderMappings()
 	noremap <silent> <buffer> <S-Right>        :cal <SID>GetOrPutDir('r')<CR>
 	noremap <silent> <buffer> <leader>o        :cal <SID>PutDir()<CR>
 	noremap <silent> <buffer> <M-O>            :cal <SID>PutDir()<CR>
-	noremap <silent> <buffer> <F5>             :cal <SID>FileCopy()<CR>
-	noremap <silent> <buffer> <F6>             :cal <SID>FileMove()<CR>
-	noremap <silent> <buffer> <F8>             :cal <SID>FileDelete()<CR>
-	noremap <silent> <buffer> <DEL>            :cal <SID>FileDelete()<CR>
 	noremap <silent> <buffer> <C-U>            :cal <SID>ExchangeDirs()<CR>
 	noremap <silent> <buffer> <leader>u        :cal <SID>ExchangeDirs()<CR>
 	noremap <silent> <buffer> <C-R>            :cal <SID>RefreshDisplays()<CR>
 	noremap <silent> <buffer> <leader>r        :cal <SID>RefreshDisplays()<CR>
-	noremap <silent> <buffer> <F10>            :cal VimCommanderToggle()<CR>
-	noremap <silent> <buffer> <F11>            :cal VimCommanderToggle()<CR>
+	"File-selection
 	noremap <silent> <buffer> <Insert>         :cal <SID>Select()<CR>
 	noremap <silent> <buffer> <C-kPlus>        :cal <SID>SelectPattern('*')<CR>
 	noremap <silent> <buffer> <leader><kPlus>  :cal <SID>SelectPattern('*')<CR>
 	noremap <silent> <buffer> <leader><kMinus> :cal <SID>DeSelectPattern('*')<CR>
 	noremap <silent> <buffer> <kPlus>          :cal <SID>SelectPatternAsk()<CR>
 	noremap <silent> <buffer> <kMinus>         :cal <SID>DeSelectPatternAsk()<CR>
+	"Dir history
+	noremap <silent> <buffer> <C-y>            :cal <SID>PrevDir()<CR>
+	noremap <silent> <buffer> <leader>y        :cal <SID>PrevDir()<CR>
+	noremap <silent> <buffer> <C-u>            :cal <SID>NextDir()<CR>
+	noremap <silent> <buffer> <leader>u        :cal <SID>NextDir()<CR>
 
+	"Misc (some are Opsplorer's)
 	noremap <silent> <buffer> <C-F11>          :cal <SID>SetMatchPattern()<CR>
 	noremap <silent> <buffer> <leader><F11>    :cal <SID>SetMatchPattern()<CR>
 	noremap <silent> <buffer> <C-O>            :cal VimCommanderToggle()<CR>
@@ -246,6 +258,8 @@ fu! <SID>InitCommanderOptions()
 	silent! setlocal nonumber
 	silent! setlocal incsearch
 	let b:vimcommander_selected=""
+	let b:vimcommander_prev=""
+	let b:vimcommander_next=""
 endf
 
 fu! <SID>InitCommanderColors()
@@ -347,8 +361,9 @@ fu! <SID>MyPath()
 	end
 endf
 
-fu! <SID>BuildTree(path)
-	let path=a:path
+fu! <SID>BuildTreeNoPrev(path)
+	let path=expand(a:path)
+	let oldpath=<SID>MyPath()
 	let b:vimcommander_selected=""
 	" clean up
 	setl ma
@@ -369,6 +384,15 @@ fu! <SID>BuildTree(path)
 	cal <SID>TreeExpand(-1,1,path)
 	" move to first entry
 	norm! ggj4|
+endf
+
+fu! <SID>BuildTree(path)
+	let oldpath=<SID>MyPath()
+	cal <SID>BuildTreeNoPrev(a:path)
+	if oldpath!=<SID>GetNextLine(b:vimcommander_prev)
+		let b:vimcommander_prev=oldpath."\n".b:vimcommander_prev
+	end
+	let b:vimcommander_next=""
 endf
 
 fu! <SID>RefreshDisplays()
@@ -836,6 +860,30 @@ fu! <SID>GotoPrevEntry()
 	en
 endf
 
+fu! <SID>PrevDir()
+	let newpath=<SID>GetNextLine(b:vimcommander_prev)
+	let oldpath=<SID>MyPath()
+	let b:vimcommander_prev=<SID>CutFirstLine(b:vimcommander_prev)
+	if strlen(newpath)>0
+		cal <SID>BuildTreeNoPrev(newpath)
+		if oldpath!=<SID>GetNextLine(b:vimcommander_next)
+			let b:vimcommander_next=oldpath."\n".b:vimcommander_next
+		end
+	end
+endf
+
+fu! <SID>NextDir()
+	let newpath=<SID>GetNextLine(b:vimcommander_next)
+	let oldpath=<SID>MyPath()
+	let b:vimcommander_next=<SID>CutFirstLine(b:vimcommander_next)
+	if strlen(newpath)>0
+		cal <SID>BuildTreeNoPrev(newpath)
+		if oldpath!=<SID>GetNextLine(b:vimcommander_prev)
+			let b:vimcommander_prev=oldpath."\n".b:vimcommander_prev
+		end
+	end
+endf
+
 "== From Opsplorer: ==========================================================
 
 fu! <SID>InitOptions()
@@ -1121,7 +1169,7 @@ fu! <SID>SpellInstallDocumentation(full_name, revision)
 endf
 
 let s:revision=
-			\ substitute("$Revision: 1.46 $",'\$\S*: \([.0-9]\+\) \$','\1','')
+			\ substitute("$Revision: 1.47 $",'\$\S*: \([.0-9]\+\) \$','\1','')
 silent! let s:install_status =
 			\ <SID>SpellInstallDocumentation(expand('<sfile>:p'), s:revision)
 if (s:install_status == 1)
@@ -1188,6 +1236,7 @@ CONTENT                                                *vimcommander-contents*
     - File operations work only on unix;
     - File selection;
     - Remembers settings;
+	- Directory history.
 
 ==============================================================================
 3. VimCommander Keys                                       *vimcommander-keys*
@@ -1211,18 +1260,22 @@ CONTENT                                                *vimcommander-contents*
     - INS     = Select file under cursor;
     - "+"     = Select file by pattern;
     - "-"     = De-select file by pattern;
-    - S-F4    = Edit new file.
+    - S-F4    = Edit new file;
+	- C-y     = Previous directory;
+	- C-u     = Next directory.
 
     C-* stands for CTRL+*. S-* stands for SHIFT+*.
-    As some terminals do not support SHIFT/CTRL+non-letter-key, a <leader>
-    version has been provided.
+    As some terminals do not support SHIFT/CTRL+non-letter-keys, a <leader>
+    version has usually been provided.
     So, <leader>Right and C-Right are the same.
+	Same for M-keys, including letters.
 
 ==============================================================================
 4. VimCommander Todo                                       *vimcommander-todo*
 
     - Command-line.
     - Options for some of the behaviors.
+    - Directory bookmarks.
 
 ==============================================================================
 5. VimCommander Links                                     *vimcommander-links*
