@@ -4,7 +4,7 @@
 " Author:  Leandro Penz
 " Date:    2003/11/01
 " Email:   lpenz AT terra DOT com DOT br
-" Version: $Id: vimcommander.vim,v 1.40 2003/11/15 12:31:18 lpenz Exp $
+" Version: $Id: vimcommander.vim,v 1.41 2003/11/15 14:56:25 lpenz Exp $
 "
 " Shameless using opsplorer.vim by Patrick Schiel.
 "
@@ -145,7 +145,7 @@ fu! <SID>Close()
 	autocmd! BufEnter VimCommanderRight
 	autocmd! BufWinLeave VimCommanderLeft 
 	autocmd! BufWinLeave VimCommanderRight
-	let winnum = bufwinnr("VimCommanderLeft")
+	let winnum = bufwinnr(s:bufnr_left)
 	if winnum != -1
 		" Jump to the existing window
 		if winnr() != winnum
@@ -154,7 +154,7 @@ fu! <SID>Close()
 	endif
 	let s:line_left=line('.')
 	silent! close
-	let winnum = bufwinnr("VimCommanderRight")
+	let winnum = bufwinnr(s:bufnr_right)
 	if winnum != -1
 		" Jump to the existing window
 		if winnr() != winnum
@@ -164,7 +164,7 @@ fu! <SID>Close()
 	let s:line_right=line('.')
 	silent! close
 	let g:vimcommander_loaded=0
-	if bufwinnr("VimCommanderRight")!=-1
+	if bufwinnr(s:bufnr_right)!=-1
 		exe "new +buffer ".s:orig_buffer
 		cal <SID>LoadOpts()
 		exe 'wincmd w'
