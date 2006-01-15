@@ -1,4 +1,4 @@
-"$Id: vimcommander.vim,v 1.54.2.7 2005/05/07 00:43:16 lpenz Exp $
+"$Id: vimcommander.vim,v 1.54.2.8 2005/05/12 02:13:10 lpenz Exp $
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Name:         vimcommander
 " Description:  total-commander-like file manager for vim.
@@ -13,9 +13,8 @@
 "                   in which this script is based,
 "               Christian Ghisler, the author of Total Commander, for the best
 "                   *-commander around. (http://www.ghisler.com)
-"               Mathieu Clabaut <mathieu.clabaut@free.fr>, the author of
-"                    vimspell, from where I got how to autogenerate the 
-"                    help from within the script.
+"               Mathieu Clabaut, the author of vimspell, from where I got how
+"                   to autogenerate the help from within the script.
 "               Diego Morales, fixes and suggestions.
 "               Yves Rutschle, fixes and suggestions.
 "               Helmut Stiegler, fixes.
@@ -1236,7 +1235,7 @@ if exists("b:vimcommander_install_doc") && b:vimcommander_install_doc==0
 end
 
 let s:revision=
-			\ substitute("$Revision: 1.54.2.7 $",'\$\S*: \([.0-9]\+\) \$','\1','')
+			\ substitute("$Revision: 1.54.2.8 $",'\$\S*: \([.0-9]\+\) \$','\1','')
 silent! let s:install_status =
 			\ <SID>SpellInstallDocumentation(expand('<sfile>:p'), s:revision)
 if (s:install_status == 1)
