@@ -4,7 +4,7 @@
 " Author:  Leandro Penz
 " Date:    2003/11/01
 " Email:   lpenz AT terra DOT com DOT br
-" Version: $Id: vimcommander.vim,v 1.34 2003/11/09 17:08:31 lpenz Exp $
+" Version: $Id: vimcommander.vim,v 1.35 2003/11/09 17:14:14 lpenz Exp $
 "
 " Shameless using opsplorer.vim by Patrick Schiel.
 "
@@ -519,7 +519,7 @@ fu! <SID>FileDelete()
 	let opt=""
 	while strlen(name)>0
 		if filereadable(filename) || isdirectory(filename)
-			if opt!~"^[Aa]$"
+			if opt!~"^[AakK]$"
 				let opt=input("OK to delete ".fnamemodify(filename,":t")."? [nkya] ","y")
 				if opt==""
 					return
