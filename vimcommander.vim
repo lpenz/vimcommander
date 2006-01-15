@@ -4,7 +4,7 @@
 " Author:  Leandro Penz
 " Date:    2003/11/01
 " Email:   lpenz AT terra DOT com DOT br
-" Version: $Id: vimcommander.vim,v 1.35 2003/11/09 17:14:14 lpenz Exp $
+" Version: $Id: vimcommander.vim,v 1.36 2003/11/12 23:04:19 lpenz Exp $
 "
 " Shameless using opsplorer.vim by Patrick Schiel.
 "
@@ -486,11 +486,11 @@ fu! <SID>FileMove()
 				end
 				if opt=~"^[yYAa]$"
 					" move file
-					system('mv -f "'.filename.'" "'.newfilename.'"')
+					cal system('mv -f "'.filename.'" "'.newfilename.'"')
 				en
 			el
 				" move file
-				system('mv "'.filename.'" "'.newfilename.'"')
+				cal system('mv "'.filename.'" "'.newfilename.'"')
 			en
 		en
 		if strlen(b:vimcommander_selected)>0
