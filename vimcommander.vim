@@ -1,4 +1,4 @@
-"$Id: vimcommander.vim,v 1.48 2003/11/17 01:54:01 lpenz Exp $
+"$Id: vimcommander.vim,v 1.49 2003/11/17 02:39:31 lpenz Exp $
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Name:         vimcommander
 " Description:  total-commander-like file manager for vim.
@@ -204,14 +204,16 @@ fu! <SID>Close()
 	let s:line_right=line('.')
 	"silent! close
 	let g:vimcommander_loaded=0
-	exe "edit +buffer ".s:buffer_to_load
+	if strlen(s:buffer_to_load)>0
+		exe "edit +buffer ".s:buffer_to_load
+	else
+		if bufwinnr(s:bufnr_right)!=-1
+			exe "new +buffer ".s:buffer_to_load
+			exe 'wincmd w'
+			close
+		end
+	end
 	cal <SID>LoadOpts()
-	"if bufwinnr(s:bufnr_right)!=-1
-	"	exe "new +buffer ".s:buffer_to_load
-	"	cal <SID>LoadOpts()
-	"	exe 'wincmd w'
-	"	close
-	"end
 endf
 
 fu! <SID>SaveOpts()
@@ -1181,7 +1183,7 @@ fu! <SID>SpellInstallDocumentation(full_name, revision)
 endf
 
 let s:revision=
-			\ substitute("$Revision: 1.48 $",'\$\S*: \([.0-9]\+\) \$','\1','')
+			\ substitute("$Revision: 1.49 $",'\$\S*: \([.0-9]\+\) \$','\1','')
 silent! let s:install_status =
 			\ <SID>SpellInstallDocumentation(expand('<sfile>:p'), s:revision)
 if (s:install_status == 1)
