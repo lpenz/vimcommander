@@ -3,7 +3,7 @@
 " Author:  Leandro Penz
 " Date:    2003/11/01
 " Email:   lpenz AT terra DOT com DOT br
-" Version: $Id: vimcommander.vim,v 1.14 2003/11/07 01:44:03 lpenz Exp $
+" Version: $Id: vimcommander.vim,v 1.15 2003/11/07 01:47:19 lpenz Exp $
 "
 " Shameless using opsplorer.vim by Patrick Schiel.
 "
@@ -151,6 +151,7 @@ fu! <SID>InitMappings()
 	noremap <silent> <buffer> <F6> :cal <SID>FileMove()<CR>
 	noremap <silent> <buffer> <F7> :cal <SID>DirCreate()<CR>
 	noremap <silent> <buffer> <F10> :cal <SID>CloseExplorer()<CR>
+	noremap <silent> <buffer> <F11> <C-W>j
 	noremap <silent> <buffer> <C-F11> :cal <SID>SetMatchPattern()<CR>
 	noremap <silent> <buffer> <C-U> :cal <SID>ExchangeDirs()<CR>
 	noremap <silent> <buffer> <C-R> :cal <SID>RefreshDisplays()<CR>
