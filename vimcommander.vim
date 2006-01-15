@@ -1,4 +1,4 @@
-"$Id: vimcommander.vim,v 1.54.2.3 2004/03/07 17:31:35 lpenz Exp $
+"$Id: vimcommander.vim,v 1.54.2.4 2004/03/22 03:22:08 lpenz Exp $
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Name:         vimcommander
 " Description:  total-commander-like file manager for vim.
@@ -1214,7 +1214,7 @@ if exists("b:vimcommander_install_doc") && b:vimcommander_install_doc==0
 end
 
 let s:revision=
-			\ substitute("$Revision: 1.54.2.3 $",'\$\S*: \([.0-9]\+\) \$','\1','')
+			\ substitute("$Revision: 1.54.2.4 $",'\$\S*: \([.0-9]\+\) \$','\1','')
 silent! let s:install_status =
 			\ <SID>SpellInstallDocumentation(expand('<sfile>:p'), s:revision)
 if (s:install_status == 1)
@@ -1337,6 +1337,8 @@ CONTENT                                                *vimcommander-contents*
     - Options for some of the behaviors.
     - Directory bookmarks.
     - Make selection by pattern faster.
+	- Rename-in-place.
+	- copy-paste mechanism.
 
 ==============================================================================
 6. VimCommander Links                                     *vimcommander-links*
