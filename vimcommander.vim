@@ -1,4 +1,4 @@
-"$Id: vimcommander.vim,v 1.54.2.2 2004/02/27 02:23:01 lpenz Exp $
+"$Id: vimcommander.vim,v 1.54.2.3 2004/03/07 17:31:35 lpenz Exp $
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Name:         vimcommander
 " Description:  total-commander-like file manager for vim.
@@ -447,7 +447,7 @@ fu! <SID>DirCreate()
 		echo "Directory already exists."
 		return 
 	end
-	let i=system("mkdir ".<SID>MyPath().newdir)
+	let i=system("mkdir \"".<SID>MyPath().newdir."\"")
 	cal <SID>RefreshDisplays()
 	norm! gg1j
 	cal search("^+".newdir."$")
@@ -1214,7 +1214,7 @@ if exists("b:vimcommander_install_doc") && b:vimcommander_install_doc==0
 end
 
 let s:revision=
-			\ substitute("$Revision: 1.54.2.2 $",'\$\S*: \([.0-9]\+\) \$','\1','')
+			\ substitute("$Revision: 1.54.2.3 $",'\$\S*: \([.0-9]\+\) \$','\1','')
 silent! let s:install_status =
 			\ <SID>SpellInstallDocumentation(expand('<sfile>:p'), s:revision)
 if (s:install_status == 1)
