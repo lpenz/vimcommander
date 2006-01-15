@@ -1,4 +1,4 @@
-"$Id: vimcommander.vim,v 1.54.2.1 2004/01/25 17:14:31 lpenz Exp $
+"$Id: vimcommander.vim,v 1.54.2.2 2004/02/27 02:23:01 lpenz Exp $
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Name:         vimcommander
 " Description:  total-commander-like file manager for vim.
@@ -16,8 +16,7 @@
 "               Mathieu Clabaut <mathieu.clabaut@free.fr>, the author of
 "                    vimspell, from where I got how to autogenerate the 
 "                    help from within the script.
-"               Diego Morales, for the patch that was really just to get his
-"                    name here. :)
+"               Diego Morales, fixes and suggestions.
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Section: Documentation 
 "
@@ -92,8 +91,8 @@ fu! <SID>CommanderMappings()
 	"Misc (some are Opsplorer's)
 	noremap <silent> <buffer> <C-F11>          :cal <SID>SetMatchPattern()<CR>
 	noremap <silent> <buffer> <leader><F11>    :cal <SID>SetMatchPattern()<CR>
-	noremap <silent> <buffer> <C-O>            :cal VimCommanderToggle()<CR>
-	noremap <silent> <buffer> <leader>o        :cal VimCommanderToggle()<CR>
+	"noremap <silent> <buffer> <C-O>            :cal VimCommanderToggle()<CR>
+	"noremap <silent> <buffer> <leader>o        :cal VimCommanderToggle()<CR>
 
 endf
 
@@ -116,7 +115,8 @@ fu!<SID>First()
 	let s:path_right=getcwd()
 	let s:line_right=2
 	let s:line_left=2
-	let g:lastside="VimCommanderLeft"
+	let g:vimcommander_lastside="VimCommanderLeft"
+	let g:vimcommander_shallcd=0
 	cal <SID>VimCommanderShow()
 endf
 
@@ -163,7 +163,7 @@ fu! <SID>VimCommanderShow()
 			exe winnum . 'wincmd w'
 		endif
 	endif
-	if g:lastside=="VimCommanderRight"
+	if g:vimcommander_lastside=="VimCommanderRight"
 		cal <SID>SwitchBuffer()
 	end
 	"norm! z-
@@ -179,13 +179,17 @@ fu! <SID>GotoEntry(line)
 endf
 
 fu! <SID>LeftBufEnter()
-	exe "cd ".<SID>MyPath()
-	let g:lastside="VimCommanderLeft"
+	if g:vimcommander_shallcd==1
+		exe "cd ".<SID>MyPath()
+	end
+	let g:vimcommander_lastside="VimCommanderLeft"
 endf
 
 fu! <SID>RightBufEnter()
-	exe "cd ".<SID>MyPath()
-	let g:lastside="VimCommanderRight"
+	if g:vimcommander_shallcd==1
+		exe "cd ".<SID>MyPath()
+	end
+	let g:vimcommander_lastside="VimCommanderRight"
 endf
 
 fu! <SID>Close()
@@ -399,7 +403,9 @@ fu! <SID>BuildTreeNoPrev(path)
 	else
 		let s:path_left=path
 	end
-	exe "cd ".<SID>MyPath()
+	if g:vimcommander_shallcd==1
+		exe "cd ".<SID>MyPath()
+	end
 	cal setline(1,path)
 	setl noma nomod
 	" pass -1 as xpos to start at column 0
@@ -655,7 +661,11 @@ fu! <SID>FileDelete()
 endf
 
 fu! <SID>PutDir()
-	let mypath=<SID>MyPath()
+	if winbufnr(0)==s:bufnr_left
+		let mypath=s:path_left
+	else
+		let mypath=s:path_right
+	end
 	cal <SID>SwitchBuffer()
 	cal <SID>BuildTree(mypath)
 	cal <SID>SwitchBuffer()
@@ -1204,7 +1214,7 @@ if exists("b:vimcommander_install_doc") && b:vimcommander_install_doc==0
 end
 
 let s:revision=
-			\ substitute("$Revision: 1.54.2.1 $",'\$\S*: \([.0-9]\+\) \$','\1','')
+			\ substitute("$Revision: 1.54.2.2 $",'\$\S*: \([.0-9]\+\) \$','\1','')
 silent! let s:install_status =
 			\ <SID>SpellInstallDocumentation(expand('<sfile>:p'), s:revision)
 if (s:install_status == 1)
@@ -1274,7 +1284,21 @@ CONTENT                                                *vimcommander-contents*
     - Directory history.
 
 ==============================================================================
-3. VimCommander Keys                                       *vimcommander-keys*
+3. VimCommander Options                                    *vimcommander-opts*
+
+    This are the options that can be set from the user's .vimrc, just use: >
+        let g:<option>=<value>
+<
+    to set the option <option> to the value <value>
+
+    Options available:
+
+    - vimcommander_shallcd: if VimCommander should change vim's working
+    directory as the directory of the current panel changes. Set to 1 to
+    enable this behavior, 0 disables. Default: 0.
+
+==============================================================================
+4. VimCommander Keys                                       *vimcommander-keys*
 
     Most of VimCommander's key-bindings are similar to the other
     commanders':
@@ -1307,7 +1331,7 @@ CONTENT                                                *vimcommander-contents*
     Same for M-keys, including letters.
 
 ==============================================================================
-4. VimCommander Todo                                       *vimcommander-todo*
+5. VimCommander Todo                                       *vimcommander-todo*
 
     - Command-line.
     - Options for some of the behaviors.
@@ -1315,7 +1339,7 @@ CONTENT                                                *vimcommander-contents*
     - Make selection by pattern faster.
 
 ==============================================================================
-5. VimCommander Links                                     *vimcommander-links*
+6. VimCommander Links                                     *vimcommander-links*
 
     http://www.vim.org/scripts/script.php?script_id=808
         Home page of VimCommander.
