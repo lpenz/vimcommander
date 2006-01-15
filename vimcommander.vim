@@ -3,7 +3,7 @@
 " Author:  Leandro Penz
 " Date:    2003/11/01
 " Email:   lpenz AT terra DOT com DOT br
-" Version: $Id: vimcommander.vim,v 1.7 2003/11/01 17:45:05 lpenz Exp $
+" Version: $Id: vimcommander.vim,v 1.8 2003/11/02 17:38:02 lpenz Exp $
 "
 " Shameless using opsplorer.vim by Patrick Schiel.
 "
@@ -120,6 +120,8 @@ fu! <SID>InitMappings()
 	"total-cmd keys:
 	noremap <silent> <buffer> <TAB> :cal <SID>SwitchBuffer()<CR>
 	noremap <silent> <buffer> <DEL> :cal <SID>FileDelete()<CR>
+	noremap <silent> <buffer> <F3> :cal <SID>OnDoubleClick(2)<CR>
+	noremap <silent> <buffer> <F4> :cal <SID>OnDoubleClick(0)<CR>
 	noremap <silent> <buffer> <F5> :cal <SID>FileCopy()<CR>
 	noremap <silent> <buffer> <F6> :cal <SID>FileMove()<CR>
 endf
@@ -429,7 +431,11 @@ fu! <SID>OnDoubleClick(close_explorer)
 					" append sequence for opening file
 					exe "cd ".fnamemodify(path,":h")
 					exe "e ".path
-					setl ma
+					if s:close_explorer==2
+						setl noma
+					else
+						setl ma
+					end
 				en
 				if s:close_explorer==1
 					cal ToggleShowVimCommander()
