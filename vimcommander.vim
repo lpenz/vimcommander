@@ -3,7 +3,7 @@
 " Author:  Leandro Penz
 " Date:    2003/11/01
 " Email:   lpenz AT terra DOT com DOT br
-" Version: $Id: vimcommander.vim,v 1.13 2003/11/07 01:37:57 lpenz Exp $
+" Version: $Id: vimcommander.vim,v 1.14 2003/11/07 01:44:03 lpenz Exp $
 "
 " Shameless using opsplorer.vim by Patrick Schiel.
 "
@@ -71,6 +71,8 @@ fu! VimCommander(...)
 	cal <SID>InitColors()
 	cal <SID>BuildTree(path2)
 	let g:vimcommander_loaded=1
+	autocmd BufEnter VimCommanderLeft let g:vimcommander_lastwindow="VimCommanderLeft"
+	autocmd BufEnter VimCommanderRight let g:vimcommander_lastwindow="VimCommanderRight"
 endf
 
 fu! <SID>MyPath()
