@@ -1,4 +1,4 @@
-"$Id: vimcommander.vim,v 1.54.2.4 2004/03/22 03:22:08 lpenz Exp $
+"$Id: vimcommander.vim,v 1.54.2.5 2004/03/28 14:23:06 lpenz Exp $
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Name:         vimcommander
 " Description:  total-commander-like file manager for vim.
@@ -365,7 +365,7 @@ fu! <SID>NewFileEdit()
 	end
 	"cal <SID>ProvideBuffer()
 	"exe "edit ".newfile
-	let s:buffer_to_load=path
+	let s:buffer_to_load=newfile
 	cal <SID>Close()
 	setlocal ma
 	setlocal noro
@@ -439,6 +439,9 @@ endf
 fu! <SID>DirCreate()
 	let newdir=""
 	let newdir=input("New directory name: ","")
+	if newdir==""
+		return
+	end
 	if filereadable(newdir)
 		echo "File with that name exists."
 		return
@@ -516,6 +519,10 @@ fu! <SID>FileCopy()
 		if filereadable(filename) || isdirectory(filename)
 			if strlen(b:vimcommander_selected)==0
 				let newfilename=input("Copy ".filename." to: ",otherfilename)
+				if newfilename==""
+					cal <SID>RefreshDisplays()
+					return
+				end
 			else
 				let newfilename=otherfilename
 			end
@@ -576,6 +583,10 @@ fu! <SID>FileMove()
 		if filereadable(filename) || isdirectory(filename)
 			if strlen(b:vimcommander_selected)==0
 				let newfilename=input("Move ".filename." to: ",otherfilename)
+				if newfilename==""
+					cal <SID>RefreshDisplays()
+					return
+				end
 			else
 				let newfilename=otherfilename
 			end
@@ -843,12 +854,18 @@ endf
 
 fu! <SID>SelectPatternAsk()
 	let pattern=input("Select with pattern: ")
+	if pattern == ""
+		return
+	endif
 	cal <SID>SelectPattern(pattern)
 	echo ""
 endf
 
 fu! <SID>DeSelectPatternAsk()
 	let pattern=input("Deselect with pattern: ")
+	if pattern == ""
+		return
+	endif
 	cal <SID>DeSelectPattern(pattern)
 	echo ""
 endf
@@ -1214,7 +1231,7 @@ if exists("b:vimcommander_install_doc") && b:vimcommander_install_doc==0
 end
 
 let s:revision=
-			\ substitute("$Revision: 1.54.2.4 $",'\$\S*: \([.0-9]\+\) \$','\1','')
+			\ substitute("$Revision: 1.54.2.5 $",'\$\S*: \([.0-9]\+\) \$','\1','')
 silent! let s:install_status =
 			\ <SID>SpellInstallDocumentation(expand('<sfile>:p'), s:revision)
 if (s:install_status == 1)
