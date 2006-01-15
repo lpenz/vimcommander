@@ -1,4 +1,4 @@
-"$Id: vimcommander.vim,v 1.50 2003/11/18 00:14:57 lpenz Exp $
+"$Id: vimcommander.vim,v 1.51 2003/11/19 22:04:56 lpenz Exp $
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Name:         vimcommander
 " Description:  total-commander-like file manager for vim.
@@ -21,6 +21,10 @@
 "
 " Documentation should be available by ":help vimcommander" command, once the
 " script has been copied in you .vim/plugin directory.
+"
+" If you do not want the documentation to be installed, just put
+" let b:vimcommander_install_doc=1
+" in your .vimrc, or uncomment the line above.
 "
 " The documentation is still available at the end of the script.
 "
@@ -1182,8 +1186,12 @@ fu! <SID>SpellInstallDocumentation(full_name, revision)
 	return 1
 endf
 
+if exists(b:vimcommander_install_doc) && b:vimcommander_install_doc==0
+	finish
+end
+
 let s:revision=
-			\ substitute("$Revision: 1.50 $",'\$\S*: \([.0-9]\+\) \$','\1','')
+			\ substitute("$Revision: 1.51 $",'\$\S*: \([.0-9]\+\) \$','\1','')
 silent! let s:install_status =
 			\ <SID>SpellInstallDocumentation(expand('<sfile>:p'), s:revision)
 if (s:install_status == 1)
@@ -1250,7 +1258,7 @@ CONTENT                                                *vimcommander-contents*
     - File operations work only on unix;
     - File selection;
     - Remembers settings;
-	- Directory history.
+    - Directory history.
 
 ==============================================================================
 3. VimCommander Keys                                       *vimcommander-keys*
@@ -1275,14 +1283,14 @@ CONTENT                                                *vimcommander-contents*
     - "+"     = Select file by pattern;
     - "-"     = De-select file by pattern;
     - S-F4    = Edit new file;
-	- C-y     = Previous directory;
-	- C-u     = Next directory.
+    - C-y     = Previous directory;
+    - C-u     = Next directory.
 
     C-* stands for CTRL+*. S-* stands for SHIFT+*.
     As some terminals do not support SHIFT/CTRL+non-letter-keys, a <leader>
     version has usually been provided.
     So, <leader>Right and C-Right are the same.
-	Same for M-keys, including letters.
+    Same for M-keys, including letters.
 
 ==============================================================================
 4. VimCommander Todo                                       *vimcommander-todo*
@@ -1290,6 +1298,7 @@ CONTENT                                                *vimcommander-contents*
     - Command-line.
     - Options for some of the behaviors.
     - Directory bookmarks.
+    - Make selection by pattern faster.
 
 ==============================================================================
 5. VimCommander Links                                     *vimcommander-links*
