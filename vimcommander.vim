@@ -4,7 +4,7 @@
 " Author:  Leandro Penz
 " Date:    2003/11/01
 " Email:   lpenz AT terra DOT com DOT br
-" Version: $Id: vimcommander.vim,v 1.33 2003/11/09 17:05:35 lpenz Exp $
+" Version: $Id: vimcommander.vim,v 1.34 2003/11/09 17:08:31 lpenz Exp $
 "
 " Shameless using opsplorer.vim by Patrick Schiel.
 "
@@ -87,6 +87,8 @@ fu! <SID>VimCommanderShow()
 	"reset aucmd
 	autocmd! BufEnter VimCommanderLeft
 	autocmd! BufEnter VimCommanderRight
+	autocmd! BufWinLeave VimCommanderLeft
+	autocmd! BufWinLeave VimCommanderRight
 	" create new window
 	let winsize=&lines
 	exe winsize." split VimCommanderRight"
@@ -125,6 +127,8 @@ endf
 fu! <SID>Close()
 	autocmd! BufEnter VimCommanderLeft
 	autocmd! BufEnter VimCommanderRight
+	autocmd! BufWinLeave VimCommanderLeft 
+	autocmd! BufWinLeave VimCommanderRight
 	let winnum = bufwinnr("VimCommanderLeft")
 	if winnum != -1
 		" Jump to the existing window
