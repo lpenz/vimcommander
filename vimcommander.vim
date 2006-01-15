@@ -3,7 +3,7 @@
 " Author:  Leandro Penz
 " Date:    2003/11/01
 " Email:   lpenz AT terra DOT com DOT br
-" Version: $Id: vimcommander.vim,v 1.3 2003/11/01 16:24:55 lpenz Exp $
+" Version: $Id: vimcommander.vim,v 1.4 2003/11/01 16:50:29 lpenz Exp $
 "
 " Heavily based on opsplorer.vim by Patrick Schiel.
 "
@@ -43,18 +43,18 @@ fu! VimCommander(...)
 	cal InitOptions()
 	" create new window
 	new
+	let s:window_bufnrleft=winbufnr(0)
 	" setup mappings, apply options, colors and draw tree
 	cal InitCommonOptions()
 	cal InitMappings()
 	cal InitColors()
 	cal BuildTree(path)
-	let s:window_bufnrleft=winbufnr(0)
 	vne
+	let s:window_bufnrright=winbufnr(0)
 	cal InitCommonOptions()
 	cal InitMappings()
 	cal InitColors()
 	cal BuildTree(path2)
-	let s:window_bufnrright=winbufnr(0)
 	let g:vimcommander_loaded=1
 endf
 
@@ -64,6 +64,31 @@ fu! OtherBuff(thisbuff)
 	else
 		return s:window_bufnrleft
 	en
+endf
+
+fu! OtherPath(thisbuff)
+	if a:thisbuff == s:window_bufnrleft
+		return s:pathright."/"
+	else
+		return s:pathleft."/"
+	en
+endf
+
+fu! RefreshDisplay()
+	norm gg$
+	cal OnDoubleClick(-1)
+	if winbufnr(0) == s:window_bufnrleft
+		winc h
+	else
+		winc l
+	end
+	norm gg$
+	cal OnDoubleClick(-1)
+	if winbufnr(0)==s:window_bufnrleft
+		winc h
+	else
+		winc l
+	end
 endf
 
 fu! InitOptions()
@@ -183,6 +208,11 @@ fu! BuildTree(path)
 	if strlen(path)>1&&path[strlen(path)-1]=="/"
 		let path=strpart(path,0,strlen(path)-1)
 	en
+	if(winbufnr(0)==s:window_bufnrleft)
+		let s:pathleft=path
+	else
+		let s:pathright=path
+	end
 	cal setline(1,path)
 	setl noma nomod
 	" pass -1 as xpos to start at column 0
@@ -217,7 +247,7 @@ endf
 
 fu! FileRename()
 	norm 1|g^
-	let filename=GetPathName(col('.')-1,line('.'))
+	let filename = GetPathName(col('.')-1,line('.'))
 	if filereadable(filename)
 		let newfilename=input("Rename to: ",filename)
 		if filereadable(newfilename)
@@ -241,8 +271,9 @@ endf
 fu! FileMove()
 	norm 1|g^
 	let filename=GetPathName(col('.')-1,line('.'))
+	let otherfilename=OtherPath(winbufnr(0)).GetName(col('.')-1,line('.'))
 	if filereadable(filename)
-		let newfilename=input("Move to: ",filename)
+		let newfilename=input("Move to: ",otherfilename)
 		if filereadable(newfilename)
 			if input("File exists, overwrite?")=~"^[yY]"
 				" move file
@@ -255,8 +286,9 @@ fu! FileMove()
 			" move file
 			let i=system("mv ".filename." ".newfilename)
 			" refresh display
-			norm gg$
-			cal OnDoubleClick(-1)
+			"norm gg$
+			"cal OnDoubleClick(-1)
+			cal RefreshDisplay()
 		en
 	en
 endf
@@ -432,6 +464,20 @@ fu! OnDoubleClick(close_explorer)
 			cal BuildTree(strpart(getline(1),0,col('.')))
 		en
 	en
+endf
+
+fu! GetName(xpos,ypos)
+	let xpos=a:xpos
+	let ypos=a:ypos
+	" check for directory..
+	if getline(ypos)[xpos]=~"[+-]"
+		let path=strpart(getline(ypos),xpos+1,col('$'))
+	el
+		" otherwise filename
+		let path=strpart(getline(ypos),xpos,col('$'))
+		let xpos=xpos-1
+	en
+	retu path
 endf
 
 fu! GetPathName(xpos,ypos)
