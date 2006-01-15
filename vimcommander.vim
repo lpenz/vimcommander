@@ -1,15 +1,70 @@
-" opsplorer - treeview file explorer for vim
+" vimcommander - totalcommander-like file explorer for vim
 "
 " Author:  Leandro Penz
 " Date:    2003/11/01
 " Email:   lpenz AT terra DOT com DOT br
-" Version: $Id: vimcommander.vim,v 1.1 2003/11/01 15:33:33 lpenz Exp $
+" Version: $Id: vimcommander.vim,v 1.2 2003/11/01 16:17:26 lpenz Exp $
 "
-" see :help opsplorer.txt for detailed description
+" Heavily based on opsplorer.vim by Patrick Schiel.
+"
 
 " setup command
-com! -nargs=* -complete=dir Opsplore cal Opsplore(<f-args>)
-noremap <silent> <F11> :cal ToggleShowExplorer()<CR>
+com! -nargs=* -complete=dir VimCommander cal VimCommander(<f-args>)
+noremap <silent> <F12> :cal ToggleShowVimCommander()<CR>
+
+fu! ToggleShowVimCommander()
+	if exists("g:vimcommander_loaded")
+		exe s:window_bufnrleft."bd"
+		exe s:window_bufnrright."bd"
+		unl g:vimcommander_loaded
+	el
+		cal VimCommander()
+	en
+endf
+
+fu! VimCommander(...)
+	" create explorer window
+	" take argument as path, if given
+	if a:0>0
+		let path=a:1
+	el
+		" otherwise current dir
+		let path=getcwd()
+	en
+	" substitute leading ~
+	" (doesn't work with isdirectory() otherwise!)
+	let path=fnamemodify(path,":p")
+	" expand, if relative path
+	if path[0]!="/"
+		let path=getcwd()."/".path
+	en
+	let path2=path
+	" setup options
+	cal InitOptions()
+	" create new window
+	new
+	" setup mappings, apply options, colors and draw tree
+	cal InitCommonOptions()
+	cal InitMappings()
+	cal InitColors()
+	cal BuildTree(path)
+	let s:window_bufnrleft=winbufnr(0)
+	vne
+	cal InitCommonOptions()
+	cal InitMappings()
+	cal InitColors()
+	cal BuildTree(path2)
+	let s:window_bufnrright=winbufnr(0)
+	let g:vimcommander_loaded=1
+endf
+
+fu! OtherBuff(thisbuff)
+	if a:thisbuff == s:window_bufnrleft
+		return s:window_bufnrright
+	else
+		return s:window_bufnrleft
+	en
+endf
 
 fu! InitOptions()
 	let s:single_click_to_edit=0
@@ -22,6 +77,7 @@ fu! InitOptions()
 	let s:use_colors=1
 	let s:close_explorer_after_open=0
 endf
+
 fu! InitMappings()
 	noremap <silent> <buffer> <LeftRelease> :cal OnClick()<CR>
 	noremap <silent> <buffer> <2-LeftMouse> :cal OnDoubleClick(-1)<CR>
@@ -43,11 +99,13 @@ fu! InitMappings()
 	noremap <silent> <buffer> H :cal ToggleShowHidden()<CR>
 	noremap <silent> <buffer> M :cal SetMatchPattern()<CR>
 endf
+
 fu! InitCommonOptions()
 	setl noscrollbind
 	setl nowrap
 	setl nonu
 endf
+
 fu! InitColors()
 	sy clear
 	if s:use_colors
@@ -102,6 +160,7 @@ fu! Opsplore(...)
 	cal BuildTree(path)
 	let g:opsplorer_loaded=1
 endf
+
 fu! ToggleShowExplorer()
 	if exists("g:opsplorer_loaded")
 		exe s:window_bufnr."bd"
@@ -110,6 +169,7 @@ fu! ToggleShowExplorer()
 		cal Opsplore()
 	en
 endf
+
 fu! CloseExplorer()
 	winc c
 endf
@@ -137,6 +197,7 @@ fu! InsertFilename()
 	winc p
 	exe "norm a".filename
 endf
+
 fu! InsertFileContent()
 	norm 1|g^
 	let filename=GetPathName(col('.')-1,line('.'))
@@ -153,6 +214,7 @@ fu! FileSee()
 		let i=system("see ".filename."&")
 	en
 endf
+
 fu! FileRename()
 	norm 1|g^
 	let filename=GetPathName(col('.')-1,line('.'))
@@ -175,6 +237,7 @@ fu! FileRename()
 		en
 	en
 endf
+
 fu! FileMove()
 	norm 1|g^
 	let filename=GetPathName(col('.')-1,line('.'))
@@ -197,6 +260,7 @@ fu! FileMove()
 		en
 	en
 endf
+
 fu! FileCopy()
 	norm 1|g^
 	let filename=GetPathName(col('.')-1,line('.'))
@@ -219,6 +283,7 @@ fu! FileCopy()
 		en
 	en
 endf
+
 fu! FileDelete()
 	norm 1|g^
 	let filename=GetPathName(col('.')-1,line('.'))
@@ -248,6 +313,7 @@ fu! GotoNextNode()
 		endw
 	en
 endf
+
 fu! GotoPrevNode()
 	" entering base path section?
 	if line('.')<3
@@ -259,6 +325,7 @@ fu! GotoPrevNode()
 		endw
 	en
 endf
+
 fu! GotoNextEntry()
 	let xpos=col('.')
 	" different movement in line 1
@@ -283,6 +350,7 @@ fu! GotoNextEntry()
 		norm j1|g^
 	en
 endf
+
 fu! GotoPrevEntry()
 	" different movement in line 1
 	if line('.')==1
@@ -308,6 +376,7 @@ fu! OnClick()
 		cal OnDoubleClick()
 	en
 endf
+
 fu! OnDoubleClick(close_explorer)
 	let s:close_explorer=a:close_explorer
 	if s:close_explorer==-1
@@ -453,6 +522,7 @@ fu! TreeExpand(xpos,ypos,path)
 	endw
 	setl noma nomod
 endf
+
 fu! TreeCollapse(xpos,ypos)
 	setl ma
 	" turn - into +, go to next line
@@ -465,6 +535,7 @@ fu! TreeCollapse(xpos,ypos)
 	norm k
 	setl noma nomod
 endf
+
 fu! TreeNodeAction(xpos,ypos)
 	if getline(a:ypos)[a:xpos] == '+'
 		cal TreeExpand(a:xpos,a:ypos,GetPathName(a:xpos,a:ypos))
@@ -472,6 +543,7 @@ fu! TreeNodeAction(xpos,ypos)
 		cal TreeCollapse(a:xpos,a:ypos)
 	en
 endf
+
 fu! IsTreeNode(xpos,ypos)
 	if getline(a:ypos)[a:xpos] =~ '[+-]'
 		" is it a directory or file starting with +/- ?
@@ -499,6 +571,7 @@ fu! GetNextLine(text)
 	let pos=match(a:text,"\n")
 	retu strpart(a:text,0,pos)
 endf
+
 fu! CutFirstLine(text)
 	let pos=match(a:text,"\n")
 	retu strpart(a:text,pos+1,strlen(a:text))
