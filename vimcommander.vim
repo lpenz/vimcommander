@@ -3,20 +3,31 @@
 " Author:  Leandro Penz
 " Date:    2003/11/01
 " Email:   lpenz AT terra DOT com DOT br
-" Version: $Id: vimcommander.vim,v 1.11 2003/11/07 00:45:21 lpenz Exp $
+" Version: $Id: vimcommander.vim,v 1.12 2003/11/07 01:16:31 lpenz Exp $
 "
 " Shameless using opsplorer.vim by Patrick Schiel.
 "
 
 " setup command
 com! -nargs=* -complete=dir VimCommander cal VimCommander(<f-args>)
-noremap <silent> <F11> :cal ToggleShowVimCommander()<CR>
 
 fu! ToggleShowVimCommander()
 	if exists("g:vimcommander_loaded")
 		exe s:window_bufnrleft."bd"
 		exe s:window_bufnrright."bd"
 		unl g:vimcommander_loaded
+	el
+		cal VimCommander()
+	en
+endf
+
+fu! GotoVimCommander()
+	if exists("g:vimcommander_loaded")
+		let winnum=g:vimcommander_lastwindow
+		exe winnum."wincmd w"
+        if winnr() != winnum
+            exe winnum . 'wincmd w'
+        endif
 	el
 		cal VimCommander()
 	en
@@ -51,6 +62,7 @@ fu! VimCommander(...)
 	cal <SID>BuildTree(path)
 	vne
 	let s:window_bufnrright=winbufnr(0)
+	let g:vimcommander_lastwindow=winbufnr(0)
 	cal <SID>InitCommonOptions()
 	cal <SID>InitMappings()
 	cal <SID>InitColors()
@@ -141,6 +153,11 @@ fu! <SID>InitCommonOptions()
 	setl noscrollbind
 	setl nowrap
 	setl nonu
+    silent! setlocal buftype=nofile
+    silent! setlocal bufhidden=delete
+    silent! setlocal noswapfile
+	silent! setlocal nobuflisted
+    silent! setlocal nonumber
 endf
 
 fu! <SID>InitColors()
@@ -208,7 +225,9 @@ fu! <SID>ToggleShowExplorer()
 endf
 
 fu! <SID>CloseExplorer()
-	winc c
+	exe s:window_bufnrleft."bd"
+	exe s:window_bufnrright."bd"
+	unl g:vimcommander_loaded
 endf
 
 fu! <SID>BuildTree(path)
@@ -445,9 +464,9 @@ fu! <SID>OnDoubleClick(close_explorer)
 	let xpos=col('.')-1
 	let ypos=line('.')
 	" clicked on node
-	if <SID>IsTreeNode(xpos,ypos)
-		cal <SID>TreeNodeAction(xpos,ypos)
-	el
+	"if <SID>IsTreeNode(xpos,ypos)
+	"	cal <SID>TreeNodeAction(xpos,ypos)
+	"el
 		" go to first non-blank when line>1
 		if ypos>1
 			norm 1|g^
@@ -495,7 +514,7 @@ fu! <SID>OnDoubleClick(close_explorer)
 			" rebuild tree with new path
 			cal <SID>BuildTree(strpart(getline(1),0,col('.')))
 		en
-	en
+	"en
 endf
 
 fu! <SID>GetName(xpos,ypos)
@@ -550,7 +569,7 @@ fu! <SID>TreeExpand(xpos,ypos,path)
 	let path=a:path
 	setl ma
 	" turn + into -
-	norm r-
+	"norm r-
 	" first get all subdirectories
 	let dirlist=""
 	" extra globbing for hidden files
