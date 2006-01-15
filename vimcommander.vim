@@ -3,7 +3,7 @@
 " Author:  Leandro Penz
 " Date:    2003/11/01
 " Email:   lpenz AT terra DOT com DOT br
-" Version: $Id: vimcommander.vim,v 1.22 2003/11/07 14:24:35 lpenz Exp $
+" Version: $Id: vimcommander.vim,v 1.23 2003/11/07 15:16:57 lpenz Exp $
 "
 " Shameless using opsplorer.vim by Patrick Schiel.
 "
@@ -28,6 +28,11 @@ fu! <SID>CommanderMappings()
     noremap <silent> <buffer> <F4>      :cal <SID>FileEdit()<CR>
     noremap <silent> <buffer> <S-F4>      :cal <SID>NewFileEdit()<CR>
     noremap <silent> <buffer> <F7>      :cal <SID>DirCreate()<CR>
+    noremap <silent> <buffer> <C-Left>  :cal <SID>GetOrPutDir('l')<CR>
+    noremap <silent> <buffer> <C-Right> :cal <SID>GetOrPutDir('r')<CR>
+    noremap <silent> <buffer> <S-Left>  :cal <SID>GetOrPutDir('l')<CR>
+    noremap <silent> <buffer> <S-Right> :cal <SID>GetOrPutDir('r')<CR>
+    noremap <silent> <buffer> <M-O>     :cal <SID>PutDir()<CR>
 
     noremap <silent> <buffer> <F5>      :cal <SID>FileCopy()<CR>
     noremap <silent> <buffer> <F6>      :cal <SID>FileMove()<CR>
@@ -37,11 +42,6 @@ fu! <SID>CommanderMappings()
     noremap <silent> <buffer> <C-F11>   :cal <SID>SetMatchPattern()<CR>
     noremap <silent> <buffer> <C-U>     :cal <SID>ExchangeDirs()<CR>
     noremap <silent> <buffer> <C-R>     :cal <SID>RefreshDisplays()<CR>
-    noremap <silent> <buffer> <C-Left>  :cal <SID>GetPutDir()<CR>
-    noremap <silent> <buffer> <C-Right> :cal <SID>GetPutDir()<CR>
-    noremap <silent> <buffer> <S-Left>  :cal <SID>GetPutDir()<CR>
-    noremap <silent> <buffer> <S-Right> :cal <SID>GetPutDir()<CR>
-    noremap <silent> <buffer> <M-O>     :cal <SID>PutDir()<CR>
     noremap <silent> <buffer> <C-O>     :cal VimCommanderToggle()<CR>
 
     noremap <silent> <buffer> <F11> :cal VimCommanderToggle()<CR>
@@ -85,19 +85,19 @@ fu! <SID>VimCommanderShow()
 	" create new window
 	let winsize=&lines
 	exe winsize." split VimCommanderRight"
-	let s:bufnr_left=winbufnr(0)
+	let s:bufnr_right=winbufnr(0)
 	" setup mappings, apply options, colors and draw tree
 	cal <SID>InitCommanderOptions()
 	cal <SID>CommanderMappings()
 	cal <SID>InitCommanderColors()
-	cal <SID>BuildTree(s:path_left)
+	cal <SID>BuildTree(s:path_right)
 	exe s:line_right
 	exe "vs VimCommanderLeft"
-	let s:bufnr_right=winbufnr(0)
+	let s:bufnr_left=winbufnr(0)
 	cal <SID>InitCommanderOptions()
 	cal <SID>CommanderMappings()
 	cal <SID>InitCommanderColors()
-	cal <SID>BuildTree(s:path_right)
+	cal <SID>BuildTree(s:path_left)
 	exe s:line_left
 	let g:vimcommander_loaded=1
 	"Goto vimcommander window
@@ -146,9 +146,9 @@ endf
 
 fu! <SID>SwitchBuffer()
 	if winbufnr(0) == s:bufnr_left
-		winc h
-	else
 		winc l
+	else
+		winc h
 	end
 endf
 
@@ -248,8 +248,7 @@ fu! <SID>NewFileEdit()
 endf
 
 fu! <SID>MyPath()
-	let thisbuff=winbufnr(0)
-	if thisbuff == s:bufnr_left
+	if winbufnr(0) == s:bufnr_left
 		return s:path_left."/"
 	else
 		return s:path_right."/"
@@ -265,10 +264,10 @@ fu! <SID>BuildTree(path)
 	if strlen(path)>1&&path[strlen(path)-1]=="/"
 		let path=strpart(path,0,strlen(path)-1)
 	en
-	if(winbufnr(0)==s:bufnr_left)
-		let s:path_left=path
-	else
+	if(winbufnr(0)==s:bufnr_right)
 		let s:path_right=path
+	else
+		let s:path_left=path
 	end
 	cal setline(1,path)
 	setl noma nomod
@@ -337,17 +336,122 @@ fu! <SID>InitCommanderColors()
 	en
 endf
 
-"=============================================================================
-
-
 fu! <SID>OtherPath()
-	let thisbuff=winbufnr(0)
-	if thisbuff == s:bufnr_left
+	if winbufnr(0) == s:bufnr_left
 		return s:path_right."/"
 	else
 		return s:path_left."/"
 	en
 endf
+
+fu! <SID>GetName(xpos,ypos)
+	let xpos=a:xpos
+	let ypos=a:ypos
+	" check for directory..
+	if getline(ypos)[xpos]=~"[+-]"
+		let path=strpart(getline(ypos),xpos+1,col('$'))
+	el
+		" otherwise filename
+		let path=strpart(getline(ypos),xpos,col('$'))
+		let xpos=xpos-1
+	en
+	retu path
+endf
+
+fu! <SID>NameUnderCursor()
+	norm 1|g^
+	return <SID>GetName(col('.')-1,line('.'))
+endf
+
+fu! <SID>FileCopy()
+	let filename=<SID>PathUnderCursor()
+	let otherfilename=<SID>OtherPath().<SID>NameUnderCursor()
+	if filereadable(filename) || isdirectory(filename)
+		let newfilename=input("Copy to: ",otherfilename)
+		if filereadable(filename) && isdirectory(newfilename)
+			echo "Can't overwrite directory with file"
+			return
+		end
+		if isdirectory(filename) && filereadable(newfilename)
+			echo "Can't overwrite file with directory"
+			return
+		end
+		if filereadable(newfilename)
+			if input("File exists, overwrite? ")=~"^[yY]"
+				" copy file
+				let i=system('cp -Rf "'.filename.'" "'.newfilename.'"')
+			en
+		el
+			" copy file
+			let i=system('cp -Rf "'.filename.'" "'.newfilename.'"')
+		en
+		cal <SID>RefreshDisplays()
+	en
+endf
+
+fu! <SID>FileMove()
+	let filename=<SID>PathUnderCursor()
+	let otherfilename=<SID>OtherPath().<SID>NameUnderCursor()
+	if filereadable(filename) || isdirectory(filename)
+		let newfilename=input("Move to: ",otherfilename)
+		if filereadable(filename) && isdirectory(newfilename)
+			echo "Can't overwrite directory with file"
+			return
+		end
+		if isdirectory(filename) && filereadable(newfilename)
+			echo "Can't overwrite file with directory"
+			return
+		end
+		if isdirectory(filename) && isdirectory(newfilename)
+			echo "Can't overwrite directory with directory"
+			return
+		end
+		if filereadable(newfilename)
+			if input("File exists, overwrite? ")=~"^[yY]"
+				" move file
+				let i=system('mv -f "'.filename.'" "'.newfilename.'"')
+			en
+		el
+			" move file
+			let i=system('mv "'.filename.'" "'.newfilename.'"')
+		en
+		cal <SID>RefreshDisplays()
+	en
+endf
+
+fu! <SID>FileDelete()
+	let filename=<SID>PathUnderCursor()
+	if filereadable(filename) || isdirectory(filename)
+		if input("OK to delete ".fnamemodify(filename,":t")."? ","y")[0]=~"[yY]"
+			let i=system('rm -rf "'.filename.'"')
+			cal <SID>RefreshDisplays()
+		en
+	en
+endf
+
+fu! <SID>PutDir()
+	let mypath=<SID>MyPath()
+	cal <SID>SwitchBuffer()
+	cal <SID>BuildTree(mypath)
+	cal <SID>SwitchBuffer()
+	cal <SID>RefreshDisplays()
+endf
+
+fu! <SID>GetOrPutDir(dir)
+	if a:dir=='l' && winbufnr(0)==s:bufnr_left " left and left - getdir
+		cal <SID>BuildTree(<SID>OtherPath())
+		return
+	end
+	if a:dir=='r' && winbufnr(0)==s:bufnr_right " right and right - getdir
+		cal <SID>BuildTree(<SID>OtherPath())
+		return
+	end
+	" Crossed - putdir
+	call <SID>PutDir()
+endf
+
+"=============================================================================
+
 
 
 fu! <SID>InitOptions()
@@ -386,49 +490,6 @@ fu! <SID>FileSee()
 	en
 endf
 
-fu! <SID>FileRename()
-	norm 1|g^
-	let filename = <SID>GetPathName(col('.')-1,line('.'))
-	if filereadable(filename)
-		let newfilename=input("Rename to: ",filename)
-		if filereadable(newfilename)
-			if input("File exists, overwrite?")=~"^[yY]"
-				setl ma
-				let i=system("mv -f ".filename." ".newfilename)
-				" refresh display
-				cal <SID>RefreshDisplays()
-			en
-		el
-			" rename file
-			setl ma
-			let i=system("mv ".filename." ".newfilename)
-			cal <SID>RefreshDisplays()
-		en
-	en
-endf
-
-fu! <SID>PutDir(dir)
-	let thisbuff=winbufnr(0)
-	if thisbuff == s:bufnr_left && a:dir==1
-		return
-	end
-	if thisbuff == s:bufnr_right && a:dir==0
-		return
-	end
-	norm 1|g^
-	let xpos=col('.')-1
-	let ypos=line('.')
-	" check, if it's a directory
-	let path=<SID>GetPathName(xpos,ypos)
-	if !isdirectory(path)
-		return 
-	end
-	cal <SID>SwitchBuffer()
-	cal <SID>BuildTree(path)
-	cal <SID>SwitchBuffer()
-	cal <SID>RefreshDisplays()
-endf
-
 fu! <SID>ExchangeDirs()
 	let pathtmp=s:path_left
 	let s:path_left=s:path_right
@@ -439,77 +500,6 @@ fu! <SID>ExchangeDirs()
 	cal <SID>BuildTree(<SID>MyPath())
 	exec myline
 	cal <SID>RefreshDisplays()
-endf
-
-fu! <SID>FileMove()
-	norm 1|g^
-	let filename=<SID>GetPathName(col('.')-1,line('.'))
-	let otherfilename=<SID>OtherPath().<SID>GetName(col('.')-1,line('.'))
-	if filereadable(filename) || isdirectory(filename)
-		let newfilename=input("Move to: ",otherfilename)
-		if filereadable(filename) && isdirectory(newfilename)
-			echo "Can't overwrite directory with file"
-			return
-		end
-		if isdirectory(filename) && filereadable(newfilename)
-			echo "Can't overwrite file with directory"
-			return
-		end
-		if isdirectory(filename) && isdirectory(newfilename)
-			echo "Can't overwrite directory with directory"
-			return
-		end
-		if filereadable(newfilename)
-			if input("File exists, overwrite? ")=~"^[yY]"
-				" move file
-				let i=system('mv -f "'.filename.'" "'.newfilename.'"')
-			en
-		el
-			" move file
-			let i=system('mv "'.filename.'" "'.newfilename.'"')
-		en
-		cal <SID>RefreshDisplays()
-	en
-endf
-
-fu! <SID>FileCopy()
-	norm 1|g^
-	let filename=<SID>GetPathName(col('.')-1,line('.'))
-	let otherfilename=<SID>OtherPath().<SID>GetName(col('.')-1,line('.'))
-	if filereadable(filename) || isdirectory(filename)
-		let newfilename=input("Copy to: ",otherfilename)
-		if filereadable(filename) && isdirectory(newfilename)
-			echo "Can't overwrite directory with file"
-			return
-		end
-		if isdirectory(filename) && filereadable(newfilename)
-			echo "Can't overwrite file with directory"
-			return
-		end
-		if filereadable(newfilename)
-			if input("File exists, overwrite? ")=~"^[yY]"
-				" copy file
-				let i=system('cp -Rf "'.filename.'" "'.newfilename.'"')
-			en
-		el
-			" copy file
-			let i=system('cp -Rf "'.filename.'" "'.newfilename.'"')
-		en
-		cal <SID>RefreshDisplays()
-	en
-endf
-
-fu! <SID>FileDelete()
-	norm 1|g^
-	let filename=<SID>GetPathName(col('.')-1,line('.'))
-	if filereadable(filename) || isdirectory(filename)
-		if input("OK to delete ".fnamemodify(filename,":t")."? ","y")[0]=~"[yY]"
-			let i=system('rm -rf "'.filename.'"')
-			setl ma
-			norm ddg^
-			setl noma
-		en
-	en
 endf
 
 fu! <SID>BuildParentTree()
@@ -656,20 +646,6 @@ fu! <SID>OnDoubleClick(close_explorer)
 		cal <SID>BuildTree(strpart(getline(1),0,col('.')))
 	en
 	"en
-endf
-
-fu! <SID>GetName(xpos,ypos)
-	let xpos=a:xpos
-	let ypos=a:ypos
-	" check for directory..
-	if getline(ypos)[xpos]=~"[+-]"
-		let path=strpart(getline(ypos),xpos+1,col('$'))
-	el
-		" otherwise filename
-		let path=strpart(getline(ypos),xpos,col('$'))
-		let xpos=xpos-1
-	en
-	retu path
 endf
 
 fu! <SID>TreeExpand(xpos,ypos,path)
