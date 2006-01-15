@@ -4,7 +4,7 @@
 " Author:  Leandro Penz
 " Date:    2003/11/01
 " Email:   lpenz AT terra DOT com DOT br
-" Version: $Id: vimcommander.vim,v 1.32 2003/11/09 16:53:16 lpenz Exp $
+" Version: $Id: vimcommander.vim,v 1.33 2003/11/09 17:05:35 lpenz Exp $
 "
 " Shameless using opsplorer.vim by Patrick Schiel.
 "
@@ -414,7 +414,7 @@ fu! <SID>FileCopy()
 			end
 			if filereadable(newfilename)
 				if opt!~"^[AakK]$"
-					let opt=input("File ".newfilename." exists, overwrite? ","y")
+					let opt=input("File ".newfilename." exists, overwrite? [nkya] ","y")
 					if opt==""
 						return
 					end
@@ -475,7 +475,7 @@ fu! <SID>FileMove()
 			end
 			if filereadable(newfilename)
 				if opt!~"^[AakK]$"
-					let opt=input("File ".newfilename." exists, overwrite? ","y")
+					let opt=input("File ".newfilename." exists, overwrite? [nkya] ","y")
 					if opt==""
 						return
 					end
@@ -516,7 +516,7 @@ fu! <SID>FileDelete()
 	while strlen(name)>0
 		if filereadable(filename) || isdirectory(filename)
 			if opt!~"^[Aa]$"
-				let opt=input("OK to delete ".fnamemodify(filename,":t")."? ","y")
+				let opt=input("OK to delete ".fnamemodify(filename,":t")."? [nkya] ","y")
 				if opt==""
 					return
 				end
