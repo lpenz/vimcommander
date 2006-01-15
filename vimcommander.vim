@@ -3,7 +3,7 @@
 " Author:  Leandro Penz
 " Date:    2003/11/01
 " Email:   lpenz AT terra DOT com DOT br
-" Version: $Id: vimcommander.vim,v 1.8 2003/11/02 17:38:02 lpenz Exp $
+" Version: $Id: vimcommander.vim,v 1.9 2003/11/07 00:03:22 lpenz Exp $
 "
 " Shameless using opsplorer.vim by Patrick Schiel.
 "
@@ -124,6 +124,7 @@ fu! <SID>InitMappings()
 	noremap <silent> <buffer> <F4> :cal <SID>OnDoubleClick(0)<CR>
 	noremap <silent> <buffer> <F5> :cal <SID>FileCopy()<CR>
 	noremap <silent> <buffer> <F6> :cal <SID>FileMove()<CR>
+	noremap <silent> <buffer> <F7> :cal <SID>DirCreate()<CR>
 endf
 
 fu! <SID>InitCommonOptions()
@@ -238,6 +239,22 @@ fu! <SID>InsertFileContent()
 	en
 endf
 
+fu! <SID>DirCreate()
+	norm 1|g^
+	let newdir=""
+	let newdir=input("New directory name: ","")
+	if filereadable(newdir)
+		echo "File with that name exists."
+		return
+	end
+	if isdirectory(newdir)
+		echo "Directory already exists."
+		return 
+	end
+	let i=system("mkdir ".newdir)
+	cal <SID>RefreshDisplays()
+endf
+
 fu! <SID>FileSee()
 	norm 1|g^
 	let filename=<SID>GetPathName(col('.')-1,line('.'))
@@ -312,7 +329,7 @@ fu! <SID>FileDelete()
 	let filename=<SID>GetPathName(col('.')-1,line('.'))
 	if filereadable(filename)
 		if input("OK to delete ".fnamemodify(filename,":t")."? ")[0]=~"[yY]"
-			let i=system("rm -f ".filename)
+			let i=system("rm -rf ".filename)
 			setl ma
 			norm ddg^
 			setl noma
