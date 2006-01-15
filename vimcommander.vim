@@ -3,7 +3,7 @@
 " Author:  Leandro Penz
 " Date:    2003/11/01
 " Email:   lpenz AT terra DOT com DOT br
-" Version: $Id: vimcommander.vim,v 1.21 2003/11/07 14:13:40 lpenz Exp $
+" Version: $Id: vimcommander.vim,v 1.22 2003/11/07 14:24:35 lpenz Exp $
 "
 " Shameless using opsplorer.vim by Patrick Schiel.
 "
@@ -21,14 +21,16 @@ fu! <SID>CommanderMappings()
 	noremap <silent> <buffer> <S-Down> :cal <SID>GotoNextNode()<CR>
 	noremap <silent> <buffer> <S-Up> :cal <SID>GotoPrevNode()<CR>
 	noremap <silent> <buffer> <BS> :cal <SID>BuildParentTree()<CR>
+
 	"total-cmd keys:
     noremap <silent> <buffer> <TAB>     :cal <SID>SwitchBuffer()<CR>
     noremap <silent> <buffer> <F3>      :cal <SID>FileView()<CR>
     noremap <silent> <buffer> <F4>      :cal <SID>FileEdit()<CR>
+    noremap <silent> <buffer> <S-F4>      :cal <SID>NewFileEdit()<CR>
+    noremap <silent> <buffer> <F7>      :cal <SID>DirCreate()<CR>
 
     noremap <silent> <buffer> <F5>      :cal <SID>FileCopy()<CR>
     noremap <silent> <buffer> <F6>      :cal <SID>FileMove()<CR>
-    noremap <silent> <buffer> <F7>      :cal <SID>DirCreate()<CR>
     noremap <silent> <buffer> <F8>      :cal <SID>FileDelete()<CR>
     noremap <silent> <buffer> <DEL>     :cal <SID>FileDelete()<CR>
     noremap <silent> <buffer> <F10>     :cal <SID>Close()<CR>
@@ -224,6 +226,27 @@ fu! <SID>FileEdit()
 	cal <SID>Close()
 endf
 
+fu! <SID>NewFileEdit()
+	let path=<SID>MyPath()
+	let newfile=<SID>PathUnderCursor()
+	if(isdirectory(newfile))
+		let newfile=path
+	end
+	let newfile=input("File to edit: ", newfile)
+	if newfile==""
+		return
+	end
+	if(isdirectory(newfile))
+		echo "Unable to edit file: directory with same name exists"
+		return
+	end
+	cal <SID>ProvideBuffer()
+	exe "edit ".newfile
+	setlocal ma
+	setlocal noro
+	cal <SID>Close()
+endf
+
 fu! <SID>MyPath()
 	let thisbuff=winbufnr(0)
 	if thisbuff == s:bufnr_left
@@ -284,6 +307,36 @@ fu! <SID>DirCreate()
 	cal search("^+".newdir."$")
 endf
 
+fu! <SID>InitCommanderOptions()
+	setlocal noscrollbind
+	setlocal nowrap
+	setlocal nonu
+	silent! setlocal buftype=nofile
+	silent! setlocal bufhidden=delete
+	silent! setlocal noswapfile
+	silent! setlocal nobuflisted
+	silent! setlocal nonumber
+endf
+
+fu! <SID>InitCommanderColors()
+	sy clear
+	if s:use_colors
+		syn match VimCommanderPath "^/.*"
+		syn match VimCommanderNode "^\s*[+-]"
+		syn match VimCommanderFile "^\s*\w\w*.*$"
+		syn match VimCommanderSource "^\s*\w\w*.*\.c$"
+		syn match VimCommanderHeader "^\s*\w\w*.*\.h$"
+		syn match VimCommanderSpecial "^\s*\(Makefile\|config.mk\)$"
+		hi link VimCommanderPath Label
+		hi link VimCommanderNode Comment
+		"hi link OpsFile Question
+		hi link VimCommanderFile Comment
+		hi link VimCommanderSource Question
+		hi link VimCommanderHeader Include
+		hi link VimCommanderSpecial Function
+	en
+endf
+
 "=============================================================================
 
 
@@ -307,36 +360,6 @@ fu! <SID>InitOptions()
 	let s:split_minwidth=1
 	let s:use_colors=1
 	let s:close_explorer_after_open=0
-endf
-
-fu! <SID>InitCommanderOptions()
-	setl noscrollbind
-	setl nowrap
-	setl nonu
-	silent! setlocal buftype=nofile
-	silent! setlocal bufhidden=delete
-	silent! setlocal noswapfile
-	silent! setlocal nobuflisted
-	silent! setlocal nonumber
-endf
-
-fu! <SID>InitCommanderColors()
-	sy clear
-	if s:use_colors
-		syn match OpsPath "^/.*"
-		syn match OpsNode "^\s*[+-]"
-		syn match OpsFile "^\s*\w\w*.*$"
-		syn match OpsSource "^\s*\w\w*.*\.c$"
-		syn match OpsHeader "^\s*\w\w*.*\.h$"
-		syn match OpsSpecial "^\s*\(Makefile\|config.mk\)$"
-		hi link OpsPath Label
-		hi link OpsNode Comment
-		"hi link OpsFile Question
-		hi link OpsFile Comment
-		hi link OpsSource Question
-		hi link OpsHeader Include
-		hi link OpsSpecial Function
-	en
 endf
 
 fu! <SID>InsertFilename()
