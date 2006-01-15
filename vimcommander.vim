@@ -4,7 +4,7 @@
 " Author:  Leandro Penz
 " Date:    2003/11/01
 " Email:   lpenz AT terra DOT com DOT br
-" Version: $Id: vimcommander.vim,v 1.27 2003/11/08 04:40:13 lpenz Exp $
+" Version: $Id: vimcommander.vim,v 1.28 2003/11/08 05:36:20 lpenz Exp $
 "
 " Shameless using opsplorer.vim by Patrick Schiel.
 "
@@ -22,26 +22,29 @@ fu! <SID>CommanderMappings()
 	noremap <silent> <buffer> <BS> :cal <SID>BuildParentTree()<CR>
 
 	"total-cmd keys:
-    noremap <silent> <buffer> <TAB>     :cal <SID>SwitchBuffer()<CR>
-    noremap <silent> <buffer> <F3>      :cal <SID>FileView()<CR>
-    noremap <silent> <buffer> <F4>      :cal <SID>FileEdit()<CR>
-    noremap <silent> <buffer> <S-F4>    :cal <SID>NewFileEdit()<CR>
-    noremap <silent> <buffer> <F7>      :cal <SID>DirCreate()<CR>
-    noremap <silent> <buffer> <C-Left>  :cal <SID>GetOrPutDir('l')<CR>
-    noremap <silent> <buffer> <C-Right> :cal <SID>GetOrPutDir('r')<CR>
-    noremap <silent> <buffer> <S-Left>  :cal <SID>GetOrPutDir('l')<CR>
-    noremap <silent> <buffer> <S-Right> :cal <SID>GetOrPutDir('r')<CR>
-    noremap <silent> <buffer> <M-O>     :cal <SID>PutDir()<CR>
-    noremap <silent> <buffer> <F5>      :cal <SID>FileCopy()<CR>
-    noremap <silent> <buffer> <F6>      :cal <SID>FileMove()<CR>
-    noremap <silent> <buffer> <F8>      :cal <SID>FileDelete()<CR>
-    noremap <silent> <buffer> <DEL>     :cal <SID>FileDelete()<CR>
-    noremap <silent> <buffer> <C-U>     :cal <SID>ExchangeDirs()<CR>
-    noremap <silent> <buffer> <C-R>     :cal <SID>RefreshDisplays()<CR>
-    noremap <silent> <buffer> <F10>     :cal VimCommanderToggle()<CR>
-    noremap <silent> <buffer> <F11>     :cal VimCommanderToggle()<CR>
-
-	noremap <silent> <buffer> <Insert>  :cal <SID>Select()<CR>
+    noremap <silent> <buffer> <TAB>      :cal <SID>SwitchBuffer()<CR>
+    noremap <silent> <buffer> <F3>       :cal <SID>FileView()<CR>
+    noremap <silent> <buffer> <F4>       :cal <SID>FileEdit()<CR>
+    noremap <silent> <buffer> <S-F4>     :cal <SID>NewFileEdit()<CR>
+    noremap <silent> <buffer> <F7>       :cal <SID>DirCreate()<CR>
+    noremap <silent> <buffer> <C-Left>   :cal <SID>GetOrPutDir('l')<CR>
+    noremap <silent> <buffer> <C-Right>  :cal <SID>GetOrPutDir('r')<CR>
+    noremap <silent> <buffer> <S-Left>   :cal <SID>GetOrPutDir('l')<CR>
+    noremap <silent> <buffer> <S-Right>  :cal <SID>GetOrPutDir('r')<CR>
+    noremap <silent> <buffer> <M-O>      :cal <SID>PutDir()<CR>
+    noremap <silent> <buffer> <F5>       :cal <SID>FileCopy()<CR>
+    noremap <silent> <buffer> <F6>       :cal <SID>FileMove()<CR>
+    noremap <silent> <buffer> <F8>       :cal <SID>FileDelete()<CR>
+    noremap <silent> <buffer> <DEL>      :cal <SID>FileDelete()<CR>
+    noremap <silent> <buffer> <C-U>      :cal <SID>ExchangeDirs()<CR>
+    noremap <silent> <buffer> <C-R>      :cal <SID>RefreshDisplays()<CR>
+    noremap <silent> <buffer> <F10>      :cal VimCommanderToggle()<CR>
+    noremap <silent> <buffer> <F11>      :cal VimCommanderToggle()<CR>
+	noremap <silent> <buffer> <Insert>   :cal <SID>Select()<CR>
+	noremap <silent> <buffer> <C-kPlus>  :cal <SID>SelectPattern('*')<CR>
+	noremap <silent> <buffer> <C-kMinus> :cal <SID>DeSelectPattern('*')<CR>
+	noremap <silent> <buffer> <kPlus>  :cal <SID>SelectPatternAsk()<CR>
+	noremap <silent> <buffer> <kMinus> :cal <SID>DeSelectPatternAsk()<CR>
 
     noremap <silent> <buffer> <C-F11>   :cal <SID>SetMatchPattern()<CR>
     noremap <silent> <buffer> <C-O>     :cal VimCommanderToggle()<CR>
@@ -194,14 +197,16 @@ endf
 fu! <SID>GetPathName(xpos,ypos)
 	let xpos=a:xpos
 	let ypos=a:ypos
+	let line=getline(ypos)
 	" check for directory..
 	if getline(ypos)[xpos]=~"[+-]"
-		let path='/'.strpart(getline(ypos),xpos+1,col('$'))
-	el
-		" otherwise filename
-		let path='/'.strpart(getline(ypos),xpos,col('$'))
+		let line=strpart(line,xpos+1,col('$'))
 		let xpos=xpos-1
-	en
+	end
+	" check selected
+	if line[0]=='<'
+		let line=strpart(line,1,strlen(line)-2)
+	end
 	" walk up tree and append subpaths
 	let row=ypos-1
 	let indent=xpos
@@ -376,7 +381,6 @@ endf
 fu! <SID>FileCopy()
 	let i=0
 	if strlen(b:vimcommander_selected)>0
-		echo b:vimcommander_selected
 		let name=<SID>SelectedNum(b:vimcommander_selected, i)
 		let filename=<SID>MyPath().name
 		let otherfilename=<SID>OtherPath().name
@@ -427,7 +431,6 @@ endf
 fu! <SID>FileMove()
 	let i=0
 	if strlen(b:vimcommander_selected)>0
-		echo b:vimcommander_selected
 		let name=<SID>SelectedNum(b:vimcommander_selected, i)
 		let filename=<SID>MyPath().name
 		let otherfilename=<SID>OtherPath().name
@@ -482,7 +485,6 @@ endf
 fu! <SID>FileDelete()
 	let i=0
 	if strlen(b:vimcommander_selected)>0
-		echo b:vimcommander_selected
 		let name=<SID>SelectedNum(b:vimcommander_selected, i)
 		let filename=<SID>MyPath().name
 		let i=i+1
@@ -571,7 +573,6 @@ fu! <SID>Select()
 					let tmp=tmp.' '
 				end
 				let tmp=tmp.'<'.found.'>'
-				echo found." != ".name
 			end
 			let found=<SID>SelectedNum(b:vimcommander_selected, i)
 			let i=i+1
@@ -604,6 +605,90 @@ fu! <SID>Select()
 		norm 1|g^
 		norm j
 	end
+endf
+
+fu! <SID>SelectPattern(pattern)
+	let origdirlist=''
+	let path=<SID>MyPath()
+	if s:show_hidden_files
+		let dirlistorig=glob(path.'/.*'.a:pattern)."\n"
+	en
+	let origdirlist=origdirlist.globpath(path, a:pattern)."\n"
+	let myline=line('.')
+	norm G
+	let lastline=line('.')
+	norm gg
+	norm j
+	while line('.')<lastline
+		let dirlist=strpart(origdirlist,0)
+		wh strlen(dirlist)>0
+			" get next line
+			let entry=<SID>GetNextLine(dirlist)
+			let dirlist=<SID>CutFirstLine(dirlist)
+			" only files
+			if entry!="." && entry!=".." && entry!=""
+				"echo "cursor in ".<SID>PathUnderCursor()." entry ".entry." len ".strlen(dirlist)
+				if entry==<SID>PathUnderCursor()
+					cal <SID>Select()
+					norm k
+					let dirlist=""
+					continue
+				end
+			en
+		endw
+		norm j
+	endwhile
+	exe myline
+endf
+
+fu! <SID>DeSelectPattern(pattern)
+	let origdirlist=''
+	let path=<SID>MyPath()
+	if s:show_hidden_files
+		let dirlistorig=glob(path.'/.*'.a:pattern)."\n"
+	en
+	let origdirlist=origdirlist.globpath(path, a:pattern)."\n"
+	let myline=line('.')
+	norm G
+	let lastline=line('.')
+	norm gg
+	norm j
+	while line('.')<lastline
+		let dirlist=strpart(origdirlist,0)
+		let path=<SID>NameUnderCursor()
+		if path=~"^<.*>$"
+			let path=<SID>MyPath().strpart(path,1,strlen(path)-2)
+			wh strlen(dirlist)>0
+				" get next line
+				let entry=<SID>GetNextLine(dirlist)
+				let dirlist=<SID>CutFirstLine(dirlist)
+				" only files
+				if entry!="." && entry!=".." && entry!=""
+					" echo "cursor in ".path." entry ".entry." len ".strlen(dirlist)
+					if entry==path
+						cal <SID>Select()
+						norm k
+						let dirlist=""
+						continue
+					end
+				end
+			endw
+		end
+		norm j
+	endwhile
+	exe myline
+endf
+
+fu! <SID>SelectPatternAsk()
+	let pattern=input("Select with pattern: ",'*')
+	cal <SID>SelectPattern(pattern)
+	echo ""
+endf
+
+fu! <SID>DeSelectPatternAsk()
+	let pattern=input("Deselect with pattern: ",'*')
+	cal <SID>DeSelectPattern(pattern)
+	echo ""
 endf
 
 "== From Opsplorer: ==========================================================
@@ -793,8 +878,6 @@ endf
 fu! <SID>TreeExpand(xpos,ypos,path)
 	let path=a:path
 	setl ma
-	" turn + into -
-	"norm r-
 	" first get all subdirectories
 	let dirlist=""
 	" extra globbing for hidden files
