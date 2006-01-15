@@ -3,7 +3,7 @@
 " Author:  Leandro Penz
 " Date:    2003/11/01
 " Email:   lpenz AT terra DOT com DOT br
-" Version: $Id: vimcommander.vim,v 1.2 2003/11/01 16:17:26 lpenz Exp $
+" Version: $Id: vimcommander.vim,v 1.3 2003/11/01 16:24:55 lpenz Exp $
 "
 " Heavily based on opsplorer.vim by Patrick Schiel.
 "
@@ -404,14 +404,14 @@ fu! OnDoubleClick(close_explorer)
 				let path=GetPathName(xpos,ypos)
 				if filereadable(path)
 					" go to last accessed buffer
-					winc p
+					winc j
 					" append sequence for opening file
 					exe "cd ".fnamemodify(path,":h")
 					exe "e ".path
 					setl ma
 				en
 				if s:close_explorer==1
-					cal ToggleShowExplorer()
+					cal ToggleShowVimCommander()
 				en
 			en
 		el
