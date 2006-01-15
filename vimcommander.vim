@@ -1,4 +1,4 @@
-"$Id: vimcommander.vim,v 1.53 2003/11/19 22:15:36 lpenz Exp $
+"$Id: vimcommander.vim,v 1.54 2003/11/19 22:16:02 lpenz Exp $
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Name:         vimcommander
 " Description:  total-commander-like file manager for vim.
@@ -1191,7 +1191,7 @@ if exists("b:vimcommander_install_doc") && b:vimcommander_install_doc==0
 end
 
 let s:revision=
-			\ substitute("$Revision: 1.53 $",'\$\S*: \([.0-9]\+\) \$','\1','')
+			\ substitute("$Revision: 1.54 $",'\$\S*: \([.0-9]\+\) \$','\1','')
 silent! let s:install_status =
 			\ <SID>SpellInstallDocumentation(expand('<sfile>:p'), s:revision)
 if (s:install_status == 1)
@@ -1283,8 +1283,8 @@ CONTENT                                                *vimcommander-contents*
     - "+"     = Select file by pattern;
     - "-"     = De-select file by pattern;
     - S-F4    = Edit new file;
-    - C-y     = Previous directory;
-    - C-u     = Next directory.
+    - C-t     = Previous directory;
+    - C-y     = Next directory.
 
     C-* stands for CTRL+*. S-* stands for SHIFT+*.
     As some terminals do not support SHIFT/CTRL+non-letter-keys, a <leader>
