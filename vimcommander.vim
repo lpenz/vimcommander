@@ -3,7 +3,7 @@
 " Author:  Leandro Penz
 " Date:    2003/11/01
 " Email:   lpenz AT terra DOT com DOT br
-" Version: $Id: vimcommander.vim,v 1.9 2003/11/07 00:03:22 lpenz Exp $
+" Version: $Id: vimcommander.vim,v 1.10 2003/11/07 00:30:36 lpenz Exp $
 "
 " Shameless using opsplorer.vim by Patrick Schiel.
 "
@@ -107,16 +107,14 @@ fu! <SID>InitMappings()
 	noremap <silent> <buffer> <S-Down> :cal <SID>GotoNextNode()<CR>
 	noremap <silent> <buffer> <S-Up> :cal <SID>GotoPrevNode()<CR>
 	noremap <silent> <buffer> <BS> :cal <SID>BuildParentTree()<CR>
-	noremap <silent> <buffer> q :cal <SID>CloseExplorer()<CR>
-	noremap <silent> <buffer> n :cal <SID>InsertFilename()<CR>
-	noremap <silent> <buffer> p :cal <SID>InsertFileContent()<CR>
-	noremap <silent> <buffer> s :cal <SID>FileSee()<CR>
-	noremap <silent> <buffer> N :cal <SID>FileRename()<CR>
-	noremap <silent> <buffer> D :cal <SID>FileDelete()<CR>
-	noremap <silent> <buffer> C :cal <SID>FileCopy()<CR>
-	noremap <silent> <buffer> O :cal <SID>FileMove()<CR>
-	noremap <silent> <buffer> H :cal <SID>ToggleShowHidden()<CR>
-	noremap <silent> <buffer> M :cal <SID>SetMatchPattern()<CR>
+	"noremap <silent> <buffer> n :cal <SID>InsertFilename()<CR>
+	"noremap <silent> <buffer> p :cal <SID>InsertFileContent()<CR>
+	"noremap <silent> <buffer> s :cal <SID>FileSee()<CR>
+	"noremap <silent> <buffer> N :cal <SID>FileRename()<CR>
+	"noremap <silent> <buffer> D :cal <SID>FileDelete()<CR>
+	"noremap <silent> <buffer> C :cal <SID>FileCopy()<CR>
+	"noremap <silent> <buffer> O :cal <SID>FileMove()<CR>
+	"noremap <silent> <buffer> H :cal <SID>ToggleShowHidden()<CR>
 	"total-cmd keys:
 	noremap <silent> <buffer> <TAB> :cal <SID>SwitchBuffer()<CR>
 	noremap <silent> <buffer> <DEL> :cal <SID>FileDelete()<CR>
@@ -125,6 +123,8 @@ fu! <SID>InitMappings()
 	noremap <silent> <buffer> <F5> :cal <SID>FileCopy()<CR>
 	noremap <silent> <buffer> <F6> :cal <SID>FileMove()<CR>
 	noremap <silent> <buffer> <F7> :cal <SID>DirCreate()<CR>
+	noremap <silent> <buffer> <F10> :cal <SID>CloseExplorer()<CR>
+	noremap <silent> <buffer> <C-F11> :cal <SID>SetMatchPattern()<CR>
 endf
 
 fu! <SID>InitCommonOptions()
@@ -295,11 +295,11 @@ fu! <SID>FileMove()
 		if filereadable(newfilename)
 			if input("File exists, overwrite?")=~"^[yY]"
 				" move file
-				let i=system("mv -f ".filename." ".newfilename)
+				let i=system('mv -f "'.filename.'" "'.newfilename.'"')
 			en
 		el
 			" move file
-			let i=system("mv ".filename." ".newfilename)
+			let i=system('mv "'.filename.'" "'.newfilename.'"')
 		en
 		cal <SID>RefreshDisplays()
 	en
@@ -314,11 +314,11 @@ fu! <SID>FileCopy()
 		if filereadable(newfilename)
 			if input("File exists, overwrite?")=~"^[yY]"
 				" copy file
-				let i=system("cp -f ".filename." ".newfilename)
+				let i=system('cp -f "'.filename.'" "'.newfilename.'"')
 			en
 		el
 			" copy file
-			let i=system("cp ".filename." ".newfilename)
+			let i=system('cp "'.filename.'" "'.newfilename.'"')
 		en
 		cal <SID>RefreshDisplays()
 	en
@@ -328,8 +328,8 @@ fu! <SID>FileDelete()
 	norm 1|g^
 	let filename=<SID>GetPathName(col('.')-1,line('.'))
 	if filereadable(filename)
-		if input("OK to delete ".fnamemodify(filename,":t")."? ")[0]=~"[yY]"
-			let i=system("rm -rf ".filename)
+		if input("OK to delete ".fnamemodify(filename,":t")."? ","y")[0]=~"[yY]"
+			let i=system('rm -rf "'.filename.'"')
 			setl ma
 			norm ddg^
 			setl noma
@@ -437,7 +437,7 @@ fu! <SID>OnDoubleClick(close_explorer)
 			if isdirectory(path)
 				" build new root structure
 				cal <SID>BuildTree(path)
-				exe "cd ".getline(1)
+				"exe "cd ".getline(1)
 			el
 				" try to resolve filename
 				" and open in other window
@@ -446,7 +446,7 @@ fu! <SID>OnDoubleClick(close_explorer)
 					" go to last accessed buffer
 					winc j
 					" append sequence for opening file
-					exe "cd ".fnamemodify(path,":h")
+					"exe "cd ".fnamemodify(path,":h")
 					exe "e ".path
 					if s:close_explorer==2
 						setl noma
@@ -466,7 +466,7 @@ fu! <SID>OnDoubleClick(close_explorer)
 				" no next slash -> current directory, just rebuild
 				if col('.')-1==xpos
 					cal <SID>BuildTree(getline(1))
-					exe "cd ".getline(1)
+					"exe "cd ".getline(1)
 					retu
 				en
 			en
