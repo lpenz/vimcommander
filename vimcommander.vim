@@ -3,7 +3,7 @@
 " Author:  Leandro Penz
 " Date:    2003/11/01
 " Email:   lpenz AT terra DOT com DOT br
-" Version: $Id: vimcommander.vim,v 1.24 2003/11/07 15:20:44 lpenz Exp $
+" Version: $Id: vimcommander.vim,v 1.25 2003/11/08 03:37:21 lpenz Exp $
 "
 " Shameless using opsplorer.vim by Patrick Schiel.
 "
@@ -24,7 +24,7 @@ fu! <SID>CommanderMappings()
     noremap <silent> <buffer> <TAB>     :cal <SID>SwitchBuffer()<CR>
     noremap <silent> <buffer> <F3>      :cal <SID>FileView()<CR>
     noremap <silent> <buffer> <F4>      :cal <SID>FileEdit()<CR>
-    noremap <silent> <buffer> <S-F4>      :cal <SID>NewFileEdit()<CR>
+    noremap <silent> <buffer> <S-F4>    :cal <SID>NewFileEdit()<CR>
     noremap <silent> <buffer> <F7>      :cal <SID>DirCreate()<CR>
     noremap <silent> <buffer> <C-Left>  :cal <SID>GetOrPutDir('l')<CR>
     noremap <silent> <buffer> <C-Right> :cal <SID>GetOrPutDir('r')<CR>
@@ -37,12 +37,14 @@ fu! <SID>CommanderMappings()
     noremap <silent> <buffer> <DEL>     :cal <SID>FileDelete()<CR>
     noremap <silent> <buffer> <C-U>     :cal <SID>ExchangeDirs()<CR>
     noremap <silent> <buffer> <C-R>     :cal <SID>RefreshDisplays()<CR>
+    noremap <silent> <buffer> <F10>     :cal VimCommanderToggle()<CR>
+    noremap <silent> <buffer> <F11>     :cal VimCommanderToggle()<CR>
 
-    noremap <silent> <buffer> <F10>     :cal <SID>Close()<CR>
+	noremap <silent> <buffer> <Insert>  :cal <SID>Select()<CR>
+
     noremap <silent> <buffer> <C-F11>   :cal <SID>SetMatchPattern()<CR>
     noremap <silent> <buffer> <C-O>     :cal VimCommanderToggle()<CR>
 
-    noremap <silent> <buffer> <F11> :cal VimCommanderToggle()<CR>
 endf
 
 fu! VimCommanderToggle()
@@ -140,6 +142,41 @@ fu! <SID>Close()
 		exe 'wincmd w'
 		close
 	end
+endf
+
+fu! <SID>InitCommanderOptions()
+	silent! setlocal noscrollbind
+	silent! setlocal nowrap
+	silent! setlocal nonu
+	silent! setlocal buftype=nofile
+	silent! setlocal bufhidden=delete
+	silent! setlocal noswapfile
+	silent! setlocal nobuflisted
+	silent! setlocal nonumber
+	silent! setlocal incsearch
+	let b:vimcommander_selected=""
+endf
+
+fu! <SID>InitCommanderColors()
+	sy clear
+	if s:use_colors
+		syntax match VimCommanderSelected '^\s*<\w.*>$'
+		syntax match VimCommanderPath "^/.*"
+		syntax match VimCommanderNode "^\s*[+-]"
+		syntax match VimCommanderFileLine "^\s*\w\w*.*$" transparent contains=ALL
+		syntax match VimCommanderFile "\w.*" contained
+		syntax match VimCommanderSource "^\s*\w\w*.*\.c$" contained
+		syntax match VimCommanderHeader "^\s*\w\w*.*\.h$" contained
+		syntax match VimCommanderSpecial "^\s*\(Makefile\|config.mk\)$" contained
+		hi link VimCommanderPath Label
+		hi link VimCommanderNode Comment
+		"hi link OpsFile Question
+		hi link VimCommanderFile Comment
+		hi link VimCommanderSource Question
+		hi link VimCommanderHeader Include
+		hi link VimCommanderSpecial Function
+		hi link VimCommanderSelected Visual
+	en
 endf
 
 fu! <SID>SwitchBuffer()
@@ -304,37 +341,6 @@ fu! <SID>DirCreate()
 	cal search("^+".newdir."$")
 endf
 
-fu! <SID>InitCommanderOptions()
-	silent! setlocal noscrollbind
-	silent! setlocal nowrap
-	silent! setlocal nonu
-	silent! setlocal buftype=nofile
-	silent! setlocal bufhidden=delete
-	silent! setlocal noswapfile
-	silent! setlocal nobuflisted
-	silent! setlocal nonumber
-	silent! setlocal incsearch
-endf
-
-fu! <SID>InitCommanderColors()
-	sy clear
-	if s:use_colors
-		syn match VimCommanderPath "^/.*"
-		syn match VimCommanderNode "^\s*[+-]"
-		syn match VimCommanderFile "^\s*\w\w*.*$"
-		syn match VimCommanderSource "^\s*\w\w*.*\.c$"
-		syn match VimCommanderHeader "^\s*\w\w*.*\.h$"
-		syn match VimCommanderSpecial "^\s*\(Makefile\|config.mk\)$"
-		hi link VimCommanderPath Label
-		hi link VimCommanderNode Comment
-		"hi link OpsFile Question
-		hi link VimCommanderFile Comment
-		hi link VimCommanderSource Question
-		hi link VimCommanderHeader Include
-		hi link VimCommanderSpecial Function
-	en
-endf
-
 fu! <SID>OtherPath()
 	if winbufnr(0) == s:bufnr_left
 		return s:path_right."/"
@@ -459,6 +465,47 @@ fu! <SID>ExchangeDirs()
 	cal <SID>BuildTree(<SID>MyPath())
 	exec myline
 	cal <SID>RefreshDisplays()
+endf
+
+fu! <SID>SelectedNum(str,idx)
+	let mystr=a:str
+	let i=0
+	wh i<a:idx
+		let mystr=strpart(mystr,1)
+		let pos=stridx(mystr, "<")
+		if pos==-1
+			return ""
+		end
+		let mystr=strpart(mystr, pos)
+		let i=+1
+	endwh
+	let pos=stridx(mystr, ">")
+	let mystr=strpart(mystr, 1, pos-1)
+	return mystr
+endf
+
+fu! <SID>Select()
+	if <SID>NameUnderCursor() =~ "^<\w*.*>$" " deselected
+		setl ma
+		norm 1|g^
+		norm x
+		norm $x
+		norm 1|g^
+		setl noma
+		norm j
+	else " select
+		if b:vimcommander_selected==""
+			let b:vimcommander_selected='<'.<SID>NameUnderCursor().'>'
+		else
+			let b:vimcommander_selected=b:vimcommander_selected." <".<SID>NameUnderCursor().">"
+		end
+		setl ma
+		norm i<
+		norm A>
+		setl noma
+		norm 1|g^
+		norm j
+	end
 endf
 
 "== From Opsplorer: ==========================================================
