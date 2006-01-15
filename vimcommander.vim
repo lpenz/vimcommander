@@ -3,7 +3,7 @@
 " Author:  Leandro Penz
 " Date:    2003/11/01
 " Email:   lpenz AT terra DOT com DOT br
-" Version: $Id: vimcommander.vim,v 1.20 2003/11/07 14:07:34 lpenz Exp $
+" Version: $Id: vimcommander.vim,v 1.21 2003/11/07 14:13:40 lpenz Exp $
 "
 " Shameless using opsplorer.vim by Patrick Schiel.
 "
@@ -278,8 +278,10 @@ fu! <SID>DirCreate()
 		echo "Directory already exists."
 		return 
 	end
-	let i=system("mkdir ".newdir)
+	let i=system("mkdir ".<SID>MyPath().newdir)
 	cal <SID>RefreshDisplays()
+	norm gg1j
+	cal search("^+".newdir."$")
 endf
 
 "=============================================================================
