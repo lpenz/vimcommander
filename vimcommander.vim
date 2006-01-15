@@ -1,16 +1,16 @@
-" vimcommander - totalcommander-like file explorer for vim
+" vimcommander - (hopefully) vim + totalcommander-like file explorer for vim
 "
 " Author:  Leandro Penz
 " Date:    2003/11/01
 " Email:   lpenz AT terra DOT com DOT br
-" Version: $Id: vimcommander.vim,v 1.5 2003/11/01 16:51:50 lpenz Exp $
+" Version: $Id: vimcommander.vim,v 1.6 2003/11/01 17:36:28 lpenz Exp $
 "
-" Heavily based on opsplorer.vim by Patrick Schiel.
+" Shameless using opsplorer.vim by Patrick Schiel.
 "
 
 " setup command
 com! -nargs=* -complete=dir VimCommander cal VimCommander(<f-args>)
-noremap <silent> <F12> :cal ToggleShowVimCommander()<CR>
+"noremap <silent> <F11> :cal ToggleShowVimCommander()<CR>
 
 fu! ToggleShowVimCommander()
 	if exists("g:vimcommander_loaded")
@@ -40,33 +40,25 @@ fu! VimCommander(...)
 	en
 	let path2=path
 	" setup options
-	cal InitOptions()
+	cal <SID>InitOptions()
 	" create new window
 	new
 	let s:window_bufnrleft=winbufnr(0)
 	" setup mappings, apply options, colors and draw tree
-	cal InitCommonOptions()
-	cal InitMappings()
-	cal InitColors()
-	cal BuildTree(path)
+	cal <SID>InitCommonOptions()
+	cal <SID>InitMappings()
+	cal <SID>InitColors()
+	cal <SID>BuildTree(path)
 	vne
 	let s:window_bufnrright=winbufnr(0)
-	cal InitCommonOptions()
-	cal InitMappings()
-	cal InitColors()
-	cal BuildTree(path2)
+	cal <SID>InitCommonOptions()
+	cal <SID>InitMappings()
+	cal <SID>InitColors()
+	cal <SID>BuildTree(path2)
 	let g:vimcommander_loaded=1
 endf
 
-fu! OtherBuff(thisbuff)
-	if a:thisbuff == s:window_bufnrleft
-		return s:window_bufnrright
-	else
-		return s:window_bufnrleft
-	en
-endf
-
-fu! OtherPath(thisbuff)
+fu! <SID>OtherPath(thisbuff)
 	if a:thisbuff == s:window_bufnrleft
 		return s:pathright."/"
 	else
@@ -74,24 +66,26 @@ fu! OtherPath(thisbuff)
 	en
 endf
 
-fu! RefreshDisplay()
-	norm gg$
-	cal OnDoubleClick(-1)
+fu! <SID>SwitchBuffer()
 	if winbufnr(0) == s:window_bufnrleft
-		winc h
-	else
-		winc l
-	end
-	norm gg$
-	cal OnDoubleClick(-1)
-	if winbufnr(0)==s:window_bufnrleft
 		winc h
 	else
 		winc l
 	end
 endf
 
-fu! InitOptions()
+fu! <SID>RefreshDisplays()
+	let line=line('.')
+	norm gg$
+	cal <SID>OnDoubleClick(-1)
+	cal <SID>SwitchBuffer()
+	norm gg$
+	cal <SID>OnDoubleClick(-1)
+	cal <SID>SwitchBuffer()
+	exec line
+endf
+
+fu! <SID>InitOptions()
 	let s:single_click_to_edit=0
 	let s:file_match_pattern="*"
 	"let s:file_match_pattern="\"`ls -d * | egrep -v \"(\.d$|\.o$|^tags$)\";ls config.mk`\""
@@ -103,35 +97,37 @@ fu! InitOptions()
 	let s:close_explorer_after_open=0
 endf
 
-fu! InitMappings()
-	noremap <silent> <buffer> <LeftRelease> :cal OnClick()<CR>
-	noremap <silent> <buffer> <2-LeftMouse> :cal OnDoubleClick(-1)<CR>
-	noremap <silent> <buffer> <Space> :cal OnDoubleClick(0)<CR>
-	noremap <silent> <buffer> <CR> :cal OnDoubleClick(1)<CR>
-	noremap <silent> <buffer> <Down> :cal GotoNextEntry()<CR>
-	noremap <silent> <buffer> <Up> :cal GotoPrevEntry()<CR>
-	noremap <silent> <buffer> <S-Down> :cal GotoNextNode()<CR>
-	noremap <silent> <buffer> <S-Up> :cal GotoPrevNode()<CR>
-	noremap <silent> <buffer> <BS> :cal BuildParentTree()<CR>
-	noremap <silent> <buffer> q :cal CloseExplorer()<CR>
-	noremap <silent> <buffer> n :cal InsertFilename()<CR>
-	noremap <silent> <buffer> p :cal InsertFileContent()<CR>
-	noremap <silent> <buffer> s :cal FileSee()<CR>
-	noremap <silent> <buffer> N :cal FileRename()<CR>
-	noremap <silent> <buffer> D :cal FileDelete()<CR>
-	noremap <silent> <buffer> C :cal FileCopy()<CR>
-	noremap <silent> <buffer> O :cal FileMove()<CR>
-	noremap <silent> <buffer> H :cal ToggleShowHidden()<CR>
-	noremap <silent> <buffer> M :cal SetMatchPattern()<CR>
+fu! <SID>InitMappings()
+	noremap <silent> <buffer> <LeftRelease> :cal <SID>OnClick()<CR>
+	noremap <silent> <buffer> <2-LeftMouse> :cal <SID>OnDoubleClick(-1)<CR>
+	noremap <silent> <buffer> <Space> :cal <SID>OnDoubleClick(0)<CR>
+	noremap <silent> <buffer> <CR> :cal <SID>OnDoubleClick(1)<CR>
+	noremap <silent> <buffer> <Down> :cal <SID>GotoNextEntry()<CR>
+	noremap <silent> <buffer> <Up> :cal <SID>GotoPrevEntry()<CR>
+	noremap <silent> <buffer> <S-Down> :cal <SID>GotoNextNode()<CR>
+	noremap <silent> <buffer> <S-Up> :cal <SID>GotoPrevNode()<CR>
+	noremap <silent> <buffer> <BS> :cal <SID>BuildParentTree()<CR>
+	noremap <silent> <buffer> q :cal <SID>CloseExplorer()<CR>
+	noremap <silent> <buffer> n :cal <SID>InsertFilename()<CR>
+	noremap <silent> <buffer> p :cal <SID>InsertFileContent()<CR>
+	noremap <silent> <buffer> s :cal <SID>FileSee()<CR>
+	noremap <silent> <buffer> N :cal <SID>FileRename()<CR>
+	noremap <silent> <buffer> D :cal <SID>FileDelete()<CR>
+	noremap <silent> <buffer> C :cal <SID>FileCopy()<CR>
+	noremap <silent> <buffer> O :cal <SID>FileMove()<CR>
+	noremap <silent> <buffer> H :cal <SID>ToggleShowHidden()<CR>
+	noremap <silent> <buffer> M :cal <SID>SetMatchPattern()<CR>
+
+	noremap <silent> <buffer> <TAB> :cal <SID>SwitchBuffer()<CR>
 endf
 
-fu! InitCommonOptions()
+fu! <SID>InitCommonOptions()
 	setl noscrollbind
 	setl nowrap
 	setl nonu
 endf
 
-fu! InitColors()
+fu! <SID>InitColors()
 	sy clear
 	if s:use_colors
 		syn match OpsPath "^/.*"
@@ -150,7 +146,7 @@ fu! InitColors()
 	en
 endf
 
-fu! Opsplore(...)
+fu! <SID>Opsplore(...)
 	" create explorer window
 	" take argument as path, if given
 	if a:0>0
@@ -167,7 +163,7 @@ fu! Opsplore(...)
 		let path=getcwd()."/".path
 	en
 	" setup options
-	cal InitOptions()
+	cal <SID>InitOptions()
 	" create new window
 	let splitcmd='new'
 	if s:split_vertical
@@ -179,27 +175,27 @@ fu! Opsplore(...)
 	" remember buffer nr
 	let s:window_bufnr=winbufnr(0)
 	" setup mappings, apply options, colors and draw tree
-	cal InitCommonOptions()
-	cal InitMappings()
-	cal InitColors()
-	cal BuildTree(path)
+	cal <SID>InitCommonOptions()
+	cal <SID>InitMappings()
+	cal <SID>InitColors()
+	cal <SID>BuildTree(path)
 	let g:opsplorer_loaded=1
 endf
 
-fu! ToggleShowExplorer()
+fu! <SID>ToggleShowExplorer()
 	if exists("g:opsplorer_loaded")
 		exe s:window_bufnr."bd"
 		unl g:opsplorer_loaded
 	el
-		cal Opsplore()
+		cal <SID>Opsplore()
 	en
 endf
 
-fu! CloseExplorer()
+fu! <SID>CloseExplorer()
 	winc c
 endf
 
-fu! BuildTree(path)
+fu! <SID>BuildTree(path)
 	let path=a:path
 	" clean up
 	setl ma
@@ -216,38 +212,38 @@ fu! BuildTree(path)
 	cal setline(1,path)
 	setl noma nomod
 	" pass -1 as xpos to start at column 0
-	cal TreeExpand(-1,1,path)
+	cal <SID>TreeExpand(-1,1,path)
 	" move to first entry
 	norm ggj1|g^
 endf
 
-fu! InsertFilename()
+fu! <SID>InsertFilename()
 	norm 1|g^
-	let filename=GetPathName(col('.')-1,line('.'))
+	let filename=<SID>GetPathName(col('.')-1,line('.'))
 	winc p
 	exe "norm a".filename
 endf
 
-fu! InsertFileContent()
+fu! <SID>InsertFileContent()
 	norm 1|g^
-	let filename=GetPathName(col('.')-1,line('.'))
+	let filename=<SID>GetPathName(col('.')-1,line('.'))
 	if filereadable(filename)
 		winc p
 		exe "r ".filename
 	en
 endf
 
-fu! FileSee()
+fu! <SID>FileSee()
 	norm 1|g^
-	let filename=GetPathName(col('.')-1,line('.'))
+	let filename=<SID>GetPathName(col('.')-1,line('.'))
 	if filereadable(filename)
 		let i=system("see ".filename."&")
 	en
 endf
 
-fu! FileRename()
+fu! <SID>FileRename()
 	norm 1|g^
-	let filename = GetPathName(col('.')-1,line('.'))
+	let filename = <SID>GetPathName(col('.')-1,line('.'))
 	if filereadable(filename)
 		let newfilename=input("Rename to: ",filename)
 		if filereadable(newfilename)
@@ -256,69 +252,59 @@ fu! FileRename()
 				let i=system("mv -f ".filename." ".newfilename)
 				" refresh display
 				norm gg$
-				cal OnDoubleClick(-1)
+				cal <SID>OnDoubleClick(-1)
 			en
 		el
 			" rename file
 			setl ma
 			let i=system("mv ".filename." ".newfilename)
 			norm gg$
-			cal OnDoubleClick(-1)
+			cal <SID>OnDoubleClick(-1)
 		en
 	en
 endf
 
-fu! FileMove()
+fu! <SID>FileMove()
 	norm 1|g^
-	let filename=GetPathName(col('.')-1,line('.'))
-	let otherfilename=OtherPath(winbufnr(0)).GetName(col('.')-1,line('.'))
+	let filename=<SID>GetPathName(col('.')-1,line('.'))
+	let otherfilename=<SID>OtherPath(winbufnr(0)).<SID>GetName(col('.')-1,line('.'))
 	if filereadable(filename)
 		let newfilename=input("Move to: ",otherfilename)
 		if filereadable(newfilename)
 			if input("File exists, overwrite?")=~"^[yY]"
 				" move file
 				let i=system("mv -f ".filename." ".newfilename)
-				" refresh display
-				norm gg$
-				cal OnDoubleClick(-1)
 			en
 		el
 			" move file
 			let i=system("mv ".filename." ".newfilename)
-			" refresh display
-			"norm gg$
-			"cal OnDoubleClick(-1)
-			cal RefreshDisplay()
 		en
+		cal <SID>RefreshDisplays()
 	en
 endf
 
-fu! FileCopy()
+fu! <SID>FileCopy()
 	norm 1|g^
-	let filename=GetPathName(col('.')-1,line('.'))
-	let otherfilename=OtherPath(winbufnr(0)).GetName(col('.')-1,line('.'))
+	let filename=<SID>GetPathName(col('.')-1,line('.'))
+	let otherfilename=<SID>OtherPath(winbufnr(0)).<SID>GetName(col('.')-1,line('.'))
 	if filereadable(filename)
 		let newfilename=input("Copy to: ",otherfilename)
 		if filereadable(newfilename)
 			if input("File exists, overwrite?")=~"^[yY]"
 				" copy file
 				let i=system("cp -f ".filename." ".newfilename)
-				" refresh display
-				norm gg$
-				cal OnDoubleClick(-1)
 			en
 		el
 			" copy file
 			let i=system("cp ".filename." ".newfilename)
-			" refresh display
-			cal RefreshDisplay()
 		en
+		cal <SID>RefreshDisplays()
 	en
 endf
 
-fu! FileDelete()
+fu! <SID>FileDelete()
 	norm 1|g^
-	let filename=GetPathName(col('.')-1,line('.'))
+	let filename=<SID>GetPathName(col('.')-1,line('.'))
 	if filereadable(filename)
 		if input("OK to delete ".fnamemodify(filename,":t")."? ")[0]=~"[yY]"
 			let i=system("rm -f ".filename)
@@ -329,15 +315,15 @@ fu! FileDelete()
 	en
 endf
 
-fu! BuildParentTree()
+fu! <SID>BuildParentTree()
 	norm gg$F/
-	cal OnDoubleClick(0)
+	cal <SID>OnDoubleClick(0)
 endf
 
-fu! GotoNextNode()
+fu! <SID>GotoNextNode()
 	" in line 1 like next entry
 	if line('.')==1
-		cal GotoNextEntry()
+		cal <SID>GotoNextEntry()
 	el
 		norm j1|g^
 		wh getline('.')[col('.')-1] !~ "[+-]" && line('.')<line('$')
@@ -346,10 +332,10 @@ fu! GotoNextNode()
 	en
 endf
 
-fu! GotoPrevNode()
+fu! <SID>GotoPrevNode()
 	" entering base path section?
 	if line('.')<3
-		cal GotoPrevEntry()
+		cal <SID>GotoPrevEntry()
 	el
 		norm k1|g^
 		wh getline('.')[col('.')-1] !~ "[+-]" && line('.')>1
@@ -358,7 +344,7 @@ fu! GotoPrevNode()
 	en
 endf
 
-fu! GotoNextEntry()
+fu! <SID>GotoNextEntry()
 	let xpos=col('.')
 	" different movement in line 1
 	if line('.')==1
@@ -383,7 +369,7 @@ fu! GotoNextEntry()
 	en
 endf
 
-fu! GotoPrevEntry()
+fu! <SID>GotoPrevEntry()
 	" different movement in line 1
 	if line('.')==1
 		" move after prev slash
@@ -399,17 +385,17 @@ fu! GotoPrevEntry()
 	en
 endf
 
-fu! OnClick()
+fu! <SID>OnClick()
 	let xpos=col('.')-1
 	let ypos=line('.')
-	if IsTreeNode(xpos,ypos)
-		cal TreeNodeAction(xpos,ypos)
+	if <SID>IsTreeNode(xpos,ypos)
+		cal <SID>TreeNodeAction(xpos,ypos)
 	elsei s:single_click_to_edit
-		cal OnDoubleClick()
+		cal <SID>OnDoubleClick()
 	en
 endf
 
-fu! OnDoubleClick(close_explorer)
+fu! <SID>OnDoubleClick(close_explorer)
 	let s:close_explorer=a:close_explorer
 	if s:close_explorer==-1
 		let s:close_explorer=s:close_explorer_after_open
@@ -417,23 +403,23 @@ fu! OnDoubleClick(close_explorer)
 	let xpos=col('.')-1
 	let ypos=line('.')
 	" clicked on node
-	if IsTreeNode(xpos,ypos)
-		cal TreeNodeAction(xpos,ypos)
+	if <SID>IsTreeNode(xpos,ypos)
+		cal <SID>TreeNodeAction(xpos,ypos)
 	el
 		" go to first non-blank when line>1
 		if ypos>1
 			norm 1|g^
 			let xpos=col('.')-1
 			" check, if it's a directory
-			let path=GetPathName(xpos,ypos)
+			let path=<SID>GetPathName(xpos,ypos)
 			if isdirectory(path)
 				" build new root structure
-				cal BuildTree(path)
+				cal <SID>BuildTree(path)
 				exe "cd ".getline(1)
 			el
 				" try to resolve filename
 				" and open in other window
-				let path=GetPathName(xpos,ypos)
+				let path=<SID>GetPathName(xpos,ypos)
 				if filereadable(path)
 					" go to last accessed buffer
 					winc j
@@ -453,7 +439,7 @@ fu! OnDoubleClick(close_explorer)
 				norm f/
 				" no next slash -> current directory, just rebuild
 				if col('.')-1==xpos
-					cal BuildTree(getline(1))
+					cal <SID>BuildTree(getline(1))
 					exe "cd ".getline(1)
 					retu
 				en
@@ -461,12 +447,12 @@ fu! OnDoubleClick(close_explorer)
 			" cut ending slash
 			norm h
 			" rebuild tree with new path
-			cal BuildTree(strpart(getline(1),0,col('.')))
+			cal <SID>BuildTree(strpart(getline(1),0,col('.')))
 		en
 	en
 endf
 
-fu! GetName(xpos,ypos)
+fu! <SID>GetName(xpos,ypos)
 	let xpos=a:xpos
 	let ypos=a:ypos
 	" check for directory..
@@ -480,7 +466,7 @@ fu! GetName(xpos,ypos)
 	retu path
 endf
 
-fu! GetPathName(xpos,ypos)
+fu! <SID>GetPathName(xpos,ypos)
 	let xpos=a:xpos
 	let ypos=a:ypos
 	" check for directory..
@@ -514,7 +500,7 @@ fu! GetPathName(xpos,ypos)
 	retu path
 endf
 
-fu! TreeExpand(xpos,ypos,path)
+fu! <SID>TreeExpand(xpos,ypos,path)
 	let path=a:path
 	setl ma
 	" turn + into -
@@ -531,14 +517,14 @@ fu! TreeExpand(xpos,ypos,path)
 	let row=a:ypos
 	wh strlen(dirlist)>0
 		" get next line
-		let entry=GetNextLine(dirlist)
-		let dirlist=CutFirstLine(dirlist)
+		let entry=<SID>GetNextLine(dirlist)
+		let dirlist=<SID>CutFirstLine(dirlist)
 		" add to tree if directory
 		if isdirectory(entry)
 			let entry=substitute(entry,".*/",'','')
 			if entry!="." && entry!=".."
 				" indent, mark as node and append
-				let entry=SpaceString(a:xpos+1)."+".entry
+				let entry=<SID>SpaceString(a:xpos+1)."+".entry
 				cal append(row,entry)
 				let row=row+1
 			en
@@ -553,14 +539,14 @@ fu! TreeExpand(xpos,ypos,path)
 	let dirlist=dirlist.globpath(path, s:file_match_pattern)."\n"
 	wh strlen(dirlist)>0
 		" get next line
-		let entry=GetNextLine(dirlist)
-		let dirlist=CutFirstLine(dirlist)
+		let entry=<SID>GetNextLine(dirlist)
+		let dirlist=<SID>CutFirstLine(dirlist)
 		" only files
 		if entry!="." && entry!=".." && entry!=""
 			if !isdirectory(entry)&&filereadable(entry)
 				let entry=substitute(entry,".*/",'','')
 				" indent and append
-				let entry=SpaceString(a:xpos+2).entry
+				let entry=<SID>SpaceString(a:xpos+2).entry
 				cal append(row,entry)
 				let row=row+1
 			en
@@ -569,7 +555,7 @@ fu! TreeExpand(xpos,ypos,path)
 	setl noma nomod
 endf
 
-fu! TreeCollapse(xpos,ypos)
+fu! <SID>TreeCollapse(xpos,ypos)
 	setl ma
 	" turn - into +, go to next line
 	norm r+j
@@ -582,18 +568,18 @@ fu! TreeCollapse(xpos,ypos)
 	setl noma nomod
 endf
 
-fu! TreeNodeAction(xpos,ypos)
+fu! <SID>TreeNodeAction(xpos,ypos)
 	if getline(a:ypos)[a:xpos] == '+'
-		cal TreeExpand(a:xpos,a:ypos,GetPathName(a:xpos,a:ypos))
+		cal <SID>TreeExpand(a:xpos,a:ypos,<SID>GetPathName(a:xpos,a:ypos))
 	elsei getline(a:ypos)[a:xpos] == '-'
-		cal TreeCollapse(a:xpos,a:ypos)
+		cal <SID>TreeCollapse(a:xpos,a:ypos)
 	en
 endf
 
-fu! IsTreeNode(xpos,ypos)
+fu! <SID>IsTreeNode(xpos,ypos)
 	if getline(a:ypos)[a:xpos] =~ '[+-]'
 		" is it a directory or file starting with +/- ?
-		if isdirectory(GetPathName(a:xpos,a:ypos))
+		if isdirectory(<SID>GetPathName(a:xpos,a:ypos))
 			retu 1
 		el
 			retu 0
@@ -603,27 +589,27 @@ fu! IsTreeNode(xpos,ypos)
 	en
 endf
 
-fu! ToggleShowHidden()
+fu! <SID>ToggleShowHidden()
 	let s:show_hidden_files = 1-s:show_hidden_files
-	cal BuildTree(getline(1))
+	cal <SID>BuildTree(getline(1))
 endf
 
-fu! SetMatchPattern()
+fu! <SID>SetMatchPattern()
 	let s:file_match_pattern=input("Match pattern: ",s:file_match_pattern)
-	cal BuildTree(getline(1))
+	cal <SID>BuildTree(getline(1))
 endf
 
-fu! GetNextLine(text)
+fu! <SID>GetNextLine(text)
 	let pos=match(a:text,"\n")
 	retu strpart(a:text,0,pos)
 endf
 
-fu! CutFirstLine(text)
+fu! <SID>CutFirstLine(text)
 	let pos=match(a:text,"\n")
 	retu strpart(a:text,pos+1,strlen(a:text))
 endf
 
-fu! GetPathName(xpos,ypos)
+fu! <SID>GetPathName(xpos,ypos)
 	let xpos=a:xpos
 	let ypos=a:ypos
 	" check for directory..
@@ -657,7 +643,7 @@ fu! GetPathName(xpos,ypos)
 	retu path
 endf
 
-fu! SpaceString(width)
+fu! <SID>SpaceString(width)
 	let spacer=""
 	let width=a:width
 	wh width>0
