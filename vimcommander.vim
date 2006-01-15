@@ -1,4 +1,4 @@
-"$Id: vimcommander.vim,v 1.44 2003/11/16 20:04:04 lpenz Exp $
+"$Id: vimcommander.vim,v 1.45 2003/11/16 22:50:06 lpenz Exp $
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Name:         vimcommander
 " Description:  total-commander-like file manager for vim.
@@ -30,8 +30,8 @@
 
 fu! <SID>CommanderMappings()
 	noremap <silent> <buffer> <LeftRelease> :cal <SID>OnClick()<CR>
-	noremap <silent> <buffer> <2-LeftMouse> :cal <SID>OnDoubleClick(-1)<CR>
-	noremap <silent> <buffer> <CR> :cal <SID>OnDoubleClick(1)<CR>
+	noremap <silent> <buffer> <2-LeftMouse> :cal <SID>OnDoubleClick()<CR>
+	noremap <silent> <buffer> <CR> :cal <SID>OnDoubleClick()<CR>
 	noremap <silent> <buffer> <Down> :cal <SID>GotoNextEntry()<CR>
 	noremap <silent> <buffer> <Up> :cal <SID>GotoPrevEntry()<CR>
 	noremap <silent> <buffer> <S-Down> :cal <SID>GotoNextNode()<CR>
@@ -124,14 +124,14 @@ fu! <SID>VimCommanderShow()
 	cal <SID>CommanderMappings()
 	cal <SID>InitCommanderColors()
 	cal <SID>BuildTree(s:path_right)
-	exe s:line_right
+	cal <SID>GotoEntry(s:line_right)
 	exe "vs VimCommanderLeft"
 	let s:bufnr_left=winbufnr(0)
 	cal <SID>InitCommanderOptions()
 	cal <SID>CommanderMappings()
 	cal <SID>InitCommanderColors()
 	cal <SID>BuildTree(s:path_left)
-	exe s:line_left
+	cal <SID>GotoEntry(s:line_left)
 	let g:vimcommander_loaded=1
 	"Goto vimcommander window
 	winc j
@@ -139,11 +139,16 @@ fu! <SID>VimCommanderShow()
 	if g:lastside=="VimCommanderRight"
 		cal <SID>SwitchBuffer()
 	end
-	norm z-
+	"norm! z-
 	autocmd BufEnter    VimCommanderLeft  cal <SID>LeftBufEnter()
 	autocmd BufEnter    VimCommanderRight cal <SID>RightBufEnter()
 	autocmd BufWinLeave VimCommanderLeft  cal VimCommanderToggle()
 	autocmd BufWinLeave VimCommanderRight cal VimCommanderToggle()
+endf
+
+fu! <SID>GotoEntry(line)
+	exe a:line
+	norm! 4|
 endf
 
 fu! <SID>LeftBufEnter()
@@ -246,16 +251,15 @@ endf
 fu! <SID>InitCommanderColors()
 	sy clear
 	if s:use_colors
-		syntax match VimCommanderSelectedFile '^\s*<.*>$'
-		syntax match VimCommanderSelectedDir '<\w.*>$' contained
+		syntax match VimCommanderSelectedFile '^.> .*'
+		syntax match VimCommanderSelectedDir '^.>+\w*.*' contained contains=VimCommanderNode
 		syntax match VimCommanderPath "^/.*"
-		syntax match VimCommanderDirLine "^[+-].*" transparent contains=VimCommanderSelectedDir,VimCommanderNode
-		syntax match VimCommanderNode "^[+-]" contained
-		syntax match VimCommanderFileLine "^\s*\w\w*.*$" transparent contains=ALL
+		syntax match VimCommanderDirLine "^..+.*" transparent contains=VimCommanderSelectedDir
+		syntax match VimCommanderFileLine "^.. \w.*" transparent contains=ALL
 		syntax match VimCommanderFile "\w.*" contained
-		syntax match VimCommanderSource "^\s*\w\w*.*\.c$" contained
-		syntax match VimCommanderHeader "^\s*\w\w*.*\.h$" contained
-		syntax match VimCommanderSpecial "^\s*\(Makefile\|config.mk\)$" contained
+		syntax match VimCommanderSource "^.. \w*.*\.c$" contained
+		syntax match VimCommanderHeader "^.. \w*.*\.h$" contained
+		syntax match VimCommanderSpecial "^.. \(Makefile\|config.mk\)$" contained
 		hi link VimCommanderPath Label
 		hi link VimCommanderNode Comment
 		"hi link OpsFile Question
@@ -274,47 +278,6 @@ fu! <SID>SwitchBuffer()
 	else
 		winc h
 	end
-endf
-
-fu! <SID>GetPathName(xpos,ypos)
-	let xpos=a:xpos
-	let ypos=a:ypos
-	" check for directory..
-	let line=getline(ypos)
-	" check selected
-	if line=~"\s*<.*>$"
-		let xpos=xpos+1
-	end
-	if getline(ypos)[xpos]=~"[+-]"
-		let path=strpart(getline(ypos),xpos+1,col('$'))
-	el
-		" otherwise filename
-		let path=strpart(getline(ypos),xpos,col('$'))
-		let xpos=xpos-1
-	en
-	if line=~"\s*<.*>$"
-		let path=strpart(path, 0, strlen(path)-1)
-	end
-	let path='/'.path
-	" walk up tree and append subpaths
-	" add base path
-	" not needed, if in root
-	if getline(1)!='/'
-		let path=getline(1).path
-	en
-	retu path
-endf
-
-fu! <SID>PathUnderCursor()
-	let xpos=col('.')-1
-	let ypos=line('.')
-	if ypos>1 "not on line 1
-		norm 1|g^
-		let xpos=col('.')-1
-		let rv=<SID>GetPathName(xpos,ypos)
-		return rv
-	end
-	return ""
 endf
 
 fu! <SID>ProvideBuffer()
@@ -389,7 +352,7 @@ fu! <SID>BuildTree(path)
 	let b:vimcommander_selected=""
 	" clean up
 	setl ma
-	norm ggVG"_xo
+	norm! ggVG"_xo
 	" check if no unneeded trailing / is there
 	if strlen(path)>1&&path[strlen(path)-1]=="/"
 		let path=strpart(path,0,strlen(path)-1)
@@ -405,22 +368,23 @@ fu! <SID>BuildTree(path)
 	" pass -1 as xpos to start at column 0
 	cal <SID>TreeExpand(-1,1,path)
 	" move to first entry
-	norm ggj1|g^
+	norm! ggj4|
 endf
 
 fu! <SID>RefreshDisplays()
 	let line=line('.')
 	cal <SID>BuildTree(<SID>MyPath())
 	exec line
+	norm 4|
 	cal <SID>SwitchBuffer()
 	let line=line('.')
 	cal <SID>BuildTree(<SID>MyPath())
 	exec line
+	norm 4|
 	cal <SID>SwitchBuffer()
 endf
 
 fu! <SID>DirCreate()
-	norm 1|g^
 	let newdir=""
 	let newdir=input("New directory name: ","")
 	if filereadable(newdir)
@@ -433,8 +397,9 @@ fu! <SID>DirCreate()
 	end
 	let i=system("mkdir ".<SID>MyPath().newdir)
 	cal <SID>RefreshDisplays()
-	norm gg1j
+	norm! gg1j
 	cal search("^+".newdir."$")
+	norm! 4|
 endf
 
 fu! <SID>OtherPath()
@@ -445,32 +410,41 @@ fu! <SID>OtherPath()
 	en
 endf
 
-fu! <SID>GetName(xpos,ypos)
+fu! <SID>GetLine()
+	let line=getline(line('.'))
+	retu strpart(line, 1)
+endf
+
+fu! <SID>FilenameUnderCursor()
+	let path=<SID>GetLine()
+	let path=strpart(path, 2)
+	return path
+endf
+
+fu! <SID>GetPathName(xpos,ypos)
 	let xpos=a:xpos
 	let ypos=a:ypos
 	" check for directory..
-	if getline(ypos)[xpos]=~"[+-]"
-		let path=strpart(getline(ypos),xpos+1,col('$'))
-	el
-		" otherwise filename
-		let path=strpart(getline(ypos),xpos,col('$'))
-		let xpos=xpos-1
+	let line=getline(ypos)
+	" check selected
+	let path=<SID>FilenameUnderCursor()
+	let path='/'.path
+	" add base path
+	" not needed, if in root
+	if getline(1)!='/'
+		let path=getline(1).path
 	en
 	retu path
 endf
 
-fu! <SID>FilenameUnderCursor()
-	norm 1|g^
-	let path=<SID>GetName(col('.')-1,line('.'))
-	if path=~"^<.*>$"
-		let path=strpart(path, 1, strlen(path)-2)
+fu! <SID>PathUnderCursor()
+	let xpos=2
+	let ypos=line('.')
+	if ypos>1 "not on line 1
+		let rv=<SID>GetPathName(xpos,ypos)
+		return rv
 	end
-	return path
-endf
-
-fu! <SID>NameUnderCursor()
-	norm 1|g^
-	return <SID>GetName(col('.')-1,line('.'))
+	return ""
 endf
 
 fu! <SID>FileCopy()
@@ -494,10 +468,12 @@ fu! <SID>FileCopy()
 				let newfilename=otherfilename
 			end
 			if filereadable(filename) && isdirectory(newfilename)
+				cal <SID>RefreshDisplays()
 				echo "Can't overwrite directory ".newfilename." with file"
 				return
 			end
 			if isdirectory(filename) && filereadable(newfilename)
+				cal <SID>RefreshDisplays()
 				echo "Can't overwrite file ".newfilename." with directory"
 				return
 			end
@@ -505,6 +481,7 @@ fu! <SID>FileCopy()
 				if opt!~"^[AakK]$"
 					let opt=input("File ".newfilename." exists, overwrite? [nkya] ","y")
 					if opt==""
+						cal <SID>RefreshDisplays()
 						return
 					end
 				end
@@ -551,14 +528,17 @@ fu! <SID>FileMove()
 				let newfilename=otherfilename
 			end
 			if filereadable(filename) && isdirectory(newfilename)
+				cal <SID>RefreshDisplays()
 				echo "Can't overwrite directory with file"
 				return
 			end
 			if isdirectory(filename) && filereadable(newfilename)
+				cal <SID>RefreshDisplays()
 				echo "Can't overwrite file with directory"
 				return
 			end
 			if isdirectory(filename) && isdirectory(newfilename)
+				cal <SID>RefreshDisplays()
 				echo "Can't overwrite directory with directory"
 				return
 			end
@@ -566,6 +546,7 @@ fu! <SID>FileMove()
 				if opt!~"^[AakK]$"
 					let opt=input("File ".newfilename." exists, overwrite? [nkya] ","y")
 					if opt==""
+						cal <SID>RefreshDisplays()
 						return
 					end
 				end
@@ -607,6 +588,7 @@ fu! <SID>FileDelete()
 			if opt!~"^[AakK]$"
 				let opt=input("OK to delete ".fnamemodify(filename,":t")."? [nkya] ","y")
 				if opt==""
+					cal <SID>RefreshDisplays()
 					return
 				end
 			end
@@ -666,67 +648,66 @@ fu! <SID>ExchangeDirs()
 	cal <SID>RefreshDisplays()
 endf
 
+fu! <SID>GetNextLine(text)
+	let pos=match(a:text,"\n")
+	retu strpart(a:text,0,pos)
+endf
+
+fu! <SID>CutFirstLine(text)
+	let pos=match(a:text,"\n")
+	if pos==-1
+		return ""
+	end
+	retu strpart(a:text,pos+1,strlen(a:text))
+endf
+
 fu! <SID>SelectedNum(str,idx)
 	let mystr=a:str
 	let i=0
 	wh i<a:idx
-		let mystr=strpart(mystr,1)
-		let pos=stridx(mystr, "<")
-		if pos==-1
-			return ""
-		end
-		let mystr=strpart(mystr, pos)
+		let mystr=<SID>CutFirstLine(mystr)
 		let i=i+1
 	endwh
-	let pos=stridx(mystr, ">")
-	let mystr=strpart(mystr, 1, pos-1)
+	let pos=stridx(mystr, "\n")
+	if pos!=-1
+		let mystr=strpart(mystr, 0, pos)
+	end
 	return mystr
 endf
 
+fu! <SID>IsSelected(line)
+	let rv=(a:line=~"^>.*")
+	retu rv
+endf
+
 fu! <SID>Select()
-	let name=<SID>NameUnderCursor()
-	if  name =~ "^+*<\w*.*>$" " deselected
-		let name=strpart(name, 1, strlen(name)-2)
+	let name=<SID>GetLine()
+	if  <SID>IsSelected(name)
+		let name=<SID>FilenameUnderCursor()
 		let tmp=""
 		let found=<SID>SelectedNum(b:vimcommander_selected, 0)
 		let i=1
 		while found!=""
 			if found!=name
-				if tmp!=""
-					let tmp=tmp.' '
-				end
-				let tmp=tmp.'<'.found.'>'
+				let tmp=tmp.found."\n"
 			end
 			let found=<SID>SelectedNum(b:vimcommander_selected, i)
 			let i=i+1
 		endwhile
 		let b:vimcommander_selected=tmp
 		setl ma
-		norm 1|g^
-		if getline(line('.'))[0]=='+'
-			norm l
-		end
-		norm x
-		norm $x
-		norm 1|g^
+		norm! |l
+		norm! s 
 		setl noma
-		norm j
+		cal <SID>GotoNextEntry()
 	else " select
-		if b:vimcommander_selected==""
-			let b:vimcommander_selected='<'.<SID>NameUnderCursor().'>'
-		else
-			let b:vimcommander_selected=b:vimcommander_selected." <".<SID>NameUnderCursor().">"
-		end
+		let b:vimcommander_selected=b:vimcommander_selected.<SID>FilenameUnderCursor()."\n"
 		setl ma
-		norm ^
-		if getline(line('.'))[0]=='+'
-			norm l
-		end
-		norm i<
-		norm A>
+		norm! |
+		norm! l
+		norm! s>
 		setl noma
-		norm 1|g^
-		norm j
+		cal <SID>GotoNextEntry()
 	end
 endf
 
@@ -738,30 +719,32 @@ fu! <SID>SelectPattern(pattern)
 	en
 	let origdirlist=origdirlist.globpath(path, a:pattern)."\n"
 	let myline=line('.')
-	norm G
+	norm! G
 	let lastline=line('.')
-	norm gg
-	norm j
+	norm! gg
+	norm! j
 	while line('.')<lastline
 		let dirlist=strpart(origdirlist,0)
-		wh strlen(dirlist)>0
-			" get next line
-			let entry=<SID>GetNextLine(dirlist)
-			let dirlist=<SID>CutFirstLine(dirlist)
-			" only files
-			if entry!="." && entry!=".." && entry!=""
-				"echo "cursor in ".<SID>PathUnderCursor()." entry ".entry." len ".strlen(dirlist)
-				if entry==<SID>PathUnderCursor()
-					cal <SID>Select()
-					norm k
-					let dirlist=""
-					continue
-				end
-			en
-		endw
-		norm j
+		let line=<SID>GetLine()
+		if(! (<SID>IsSelected(line)))
+			wh strlen(dirlist)>0
+				" get next line
+				let entry=<SID>GetNextLine(dirlist)
+				let dirlist=<SID>CutFirstLine(dirlist)
+				" only files
+				if entry!="." && entry!=".." && entry!=""
+					if entry==<SID>PathUnderCursor()
+						cal <SID>Select()
+						norm! k
+						let dirlist=""
+						continue
+					end
+				en
+			endw
+		end
+		norm! j
 	endwhile
-	exe myline
+	cal <SID>GotoEntry(myline)
 endf
 
 fu! <SID>DeSelectPattern(pattern)
@@ -772,34 +755,34 @@ fu! <SID>DeSelectPattern(pattern)
 	en
 	let origdirlist=origdirlist.globpath(path, a:pattern)."\n"
 	let myline=line('.')
-	norm G
+	norm! G
 	let lastline=line('.')
-	norm gg
-	norm j
+	norm! gg
+	norm! j
 	while line('.')<lastline
 		let dirlist=strpart(origdirlist,0)
-		let path=<SID>NameUnderCursor()
-		if path=~"^<.*>$"
-			let path=<SID>MyPath().strpart(path,1,strlen(path)-2)
+		let path=<SID>GetLine()
+		if <SID>IsSelected(path)
+			let path=<SID>MyPath().<SID>FilenameUnderCursor()
 			wh strlen(dirlist)>0
 				" get next line
 				let entry=<SID>GetNextLine(dirlist)
 				let dirlist=<SID>CutFirstLine(dirlist)
 				" only files
 				if entry!="." && entry!=".." && entry!=""
-					" echo "cursor in ".path." entry ".entry." len ".strlen(dirlist)
+					"echo "cursor in ".path." entry ".entry." len ".strlen(dirlist)
 					if entry==path
 						cal <SID>Select()
-						norm k
+						norm! k
 						let dirlist=""
 						continue
 					end
 				end
 			endw
 		end
-		norm j
+		norm! j
 	endwhile
-	exe myline
+	cal <SID>GotoEntry(myline)
 endf
 
 fu! <SID>SelectPatternAsk()
@@ -812,6 +795,45 @@ fu! <SID>DeSelectPatternAsk()
 	let pattern=input("Deselect with pattern: ")
 	cal <SID>DeSelectPattern(pattern)
 	echo ""
+endf
+
+fu! <SID>GotoNextEntry()
+	let xpos=col('.')
+	" different movement in line 1
+	if line('.')==1
+		" if over slash, move one to right
+		if getline('.')[xpos-1]=='/'
+			norm! l
+			" only root path there, move down
+			if col('.')==1
+				norm! j4
+			en
+		el
+			" otherwise after next slash
+			norm! f/l
+			" if already last path, move down
+			if col('.')==xpos
+				norm! j4
+			en
+		en
+	el
+		norm! j4|
+	en
+endf
+
+fu! <SID>GotoPrevEntry()
+	" different movement in line 1
+	if line('.')==1
+		" move after prev slash
+		norm! hF/l
+	el
+		" enter line 1 at the end
+		if line('.')==2
+			norm! k$F/l
+		el
+			norm! k4|
+		en
+	en
 endf
 
 "== From Opsplorer: ==========================================================
@@ -829,14 +851,14 @@ fu! <SID>InitOptions()
 endf
 
 fu! <SID>InsertFilename()
-	norm 1|g^
+	norm! 4|
 	let filename=<SID>GetPathName(col('.')-1,line('.'))
 	winc p
-	exe "norm a".filename
+	exe "norm! a".filename
 endf
 
 fu! <SID>InsertFileContent()
-	norm 1|g^
+	norm! 4|
 	let filename=<SID>GetPathName(col('.')-1,line('.'))
 	if filereadable(filename)
 		winc p
@@ -845,7 +867,7 @@ fu! <SID>InsertFileContent()
 endf
 
 fu! <SID>FileSee()
-	norm 1|g^
+	norm! 4|
 	let filename=<SID>GetPathName(col('.')-1,line('.'))
 	if filereadable(filename)
 		let i=system("see ".filename."&")
@@ -853,11 +875,12 @@ fu! <SID>FileSee()
 endf
 
 fu! <SID>BuildParentTree()
-	norm gg$F/
+	norm! gg$F/
 	let mydir=getline(line('.'))
-	let mypos="^+".strpart(mydir, strridx(mydir,'/')+1)."$"
-	cal <SID>OnDoubleClick(0)
+	let mypos="^..+".strpart(mydir, strridx(mydir,'/')+1)."$"
+	cal <SID>OnDoubleClick()
 	call search(mypos)
+	norm! 4|
 endf
 
 fu! <SID>GotoNextNode()
@@ -865,9 +888,9 @@ fu! <SID>GotoNextNode()
 	if line('.')==1
 		cal <SID>GotoNextEntry()
 	el
-		norm j1|g^
+		norm! j4|
 		wh getline('.')[col('.')-1] !~ "[+-]" && line('.')<line('$')
-			norm j1|g^
+			norm! j4|
 		endw
 	en
 endf
@@ -877,112 +900,55 @@ fu! <SID>GotoPrevNode()
 	if line('.')<3
 		cal <SID>GotoPrevEntry()
 	el
-		norm k1|g^
+		norm! k4|
 		wh getline('.')[col('.')-1] !~ "[+-]" && line('.')>1
-			norm k1|g^
+			norm! k4|
 		endw
-	en
-endf
-
-fu! <SID>GotoNextEntry()
-	let xpos=col('.')
-	" different movement in line 1
-	if line('.')==1
-		" if over slash, move one to right
-		if getline('.')[xpos-1]=='/'
-			norm l
-			" only root path there, move down
-			if col('.')==1
-				norm j1|g^
-			en
-		el
-			" otherwise after next slash
-			norm f/l
-			" if already last path, move down
-			if col('.')==xpos
-				norm j1|g^
-			en
-		en
-	el
-		" next line, first nonblank
-		norm j1|g^
-	en
-endf
-
-fu! <SID>GotoPrevEntry()
-	" different movement in line 1
-	if line('.')==1
-		" move after prev slash
-		norm hF/l
-	el
-		" enter line 1 at the end
-		if line('.')==2
-			norm k$F/l
-		el
-			" prev line, first nonblank
-			norm k1|g^
-		en
 	en
 endf
 
 fu! <SID>OnClick()
 	let xpos=col('.')-1
 	let ypos=line('.')
-	if <SID>IsTreeNode(xpos,ypos)
-		cal <SID>TreeNodeAction(xpos,ypos)
-	elsei s:single_click_to_edit
+	if s:single_click_to_edit
 		cal <SID>OnDoubleClick()
 	en
 endf
 
-fu! <SID>OnDoubleClick(close_explorer)
-	let s:close_explorer=a:close_explorer
-	if s:close_explorer==-1
-		let s:close_explorer=s:close_explorer_after_open
-	en
+fu! <SID>OnDoubleClick()
 	let xpos=col('.')-1
 	let ypos=line('.')
-	" clicked on node
-	"if <SID>IsTreeNode(xpos,ypos)
-	"	cal <SID>TreeNodeAction(xpos,ypos)
-	"el
 	" go to first non-blank when line>1
 	if ypos>1
-		norm 1|g^
-		let xpos=col('.')-1
+		let xpos=2
 		" check, if it's a directory
 		let path=<SID>GetPathName(xpos,ypos)
 		if isdirectory(path)
 			" build new root structure
 			cal <SID>BuildTree(path)
-			"exe "cd ".getline(1)
 		el
 			" try to resolve filename
 			" and open in other window
 			if filereadable(path)
 				cal <SID>FileEdit()
-				" append sequence for opening file
-				"exe "cd ".fnamemodify(path,":h")
 			en
 		en
 	el
 		" we're on line 1 here! getting new base path now...
 		" advance to next slash
 		if getline(1)[xpos]!="/"
-			norm f/
+			norm! f/
 			" no next slash -> current directory, just rebuild
 			if col('.')-1==xpos
 				cal <SID>BuildTree(getline(1))
-				"exe "cd ".getline(1)
 				retu
 			en
 		en
 		" cut ending slash
-		norm h
+		norm! h
 		" rebuild tree with new path
 		cal <SID>BuildTree(strpart(getline(1),0,col('.')))
 	en
-	"en
 endf
 
 fu! <SID>TreeExpand(xpos,ypos,path)
@@ -994,7 +960,7 @@ fu! <SID>TreeExpand(xpos,ypos,path)
 	if s:show_hidden_files
 		let dirlist=glob(path.'/.*')."\n"
 	en
-	" add norm entries
+	" add norm! entries
 	let dirlist=dirlist.glob(path.'/*')."\n"
 	" remember where to append
 	let row=a:ypos
@@ -1007,7 +973,7 @@ fu! <SID>TreeExpand(xpos,ypos,path)
 			let entry=substitute(entry,".*/",'','')
 			if entry!="." && entry!=".."
 				" indent, mark as node and append
-				let entry=" "."+".entry
+				let entry="  "."+".entry
 				cal append(row,entry)
 				let row=row+1
 			en
@@ -1029,47 +995,13 @@ fu! <SID>TreeExpand(xpos,ypos,path)
 			if !isdirectory(entry)&&filereadable(entry)
 				let entry=substitute(entry,".*/",'','')
 				" indent and append
-				let entry="  ".entry
+				let entry="   ".entry
 				cal append(row,entry)
 				let row=row+1
 			en
 		en
 	endw
 	setl noma nomod
-endf
-
-fu! <SID>TreeCollapse(xpos,ypos)
-	setl ma
-	" turn - into +, go to next line
-	norm r+j
-	" delete lines til next line with same indent
-	wh (getline('.')[a:xpos+1] =~ '[ +-]') && (line('$') != line('.'))
-		norm dd
-	endw
-	" go up again
-	norm k
-	setl noma nomod
-endf
-
-fu! <SID>TreeNodeAction(xpos,ypos)
-	if getline(a:ypos)[a:xpos] == '+'
-		cal <SID>TreeExpand(a:xpos,a:ypos,<SID>GetPathName(a:xpos,a:ypos))
-	elsei getline(a:ypos)[a:xpos] == '-'
-		cal <SID>TreeCollapse(a:xpos,a:ypos)
-	en
-endf
-
-fu! <SID>IsTreeNode(xpos,ypos)
-	if getline(a:ypos)[a:xpos] =~ '[+-]'
-		" is it a directory or file starting with +/- ?
-		if isdirectory(<SID>GetPathName(a:xpos,a:ypos))
-			retu 1
-		el
-			retu 0
-		en
-	el
-		retu 0
-	en
 endf
 
 fu! <SID>ToggleShowHidden()
@@ -1080,16 +1012,6 @@ endf
 fu! <SID>SetMatchPattern()
 	let s:file_match_pattern=input("Match pattern: ",s:file_match_pattern)
 	cal <SID>BuildTree(getline(1))
-endf
-
-fu! <SID>GetNextLine(text)
-	let pos=match(a:text,"\n")
-	retu strpart(a:text,0,pos)
-endf
-
-fu! <SID>CutFirstLine(text)
-	let pos=match(a:text,"\n")
-	retu strpart(a:text,pos+1,strlen(a:text))
 endf
 
 fu! <SID>SpellInstallDocumentation(full_name, revision)
@@ -1164,8 +1086,8 @@ fu! <SID>SpellInstallDocumentation(full_name, revision)
 	let l:buf = bufnr("%")
 	setl noswapfile modifiable
 
-	norm zR
-	norm gg
+	norm! zR
+	norm! gg
 
 	" Delete from first line to a line starts with
 	" === START_DOC
@@ -1185,7 +1107,7 @@ fu! <SID>SpellInstallDocumentation(full_name, revision)
 	call append(line('$'), ' v' . 'im:tw=78:ts=8:ft=help:norl:')
 
 	" Replace revision:
-	exe "normal :1s/#version#/ v" . a:revision . "/\<CR>"
+	exe "norm! :1s/#version#/ v" . a:revision . "/\<CR>"
 
 	" Save the help document:
 	exe 'w! ' . l:doc_file
@@ -1199,14 +1121,13 @@ fu! <SID>SpellInstallDocumentation(full_name, revision)
 endf
 
 let s:revision=
-			\ substitute("$Revision: 1.44 $",'\$\S*: \([.0-9]\+\) \$','\1','')
+			\ substitute("$Revision: 1.45 $",'\$\S*: \([.0-9]\+\) \$','\1','')
 silent! let s:install_status =
 			\ <SID>SpellInstallDocumentation(expand('<sfile>:p'), s:revision)
 if (s:install_status == 1)
 	echom expand("<sfile>:t:r") . ' v' . s:revision .
 				\ ': Help-documentation installed.'
 endif
-
 
 finish
 
