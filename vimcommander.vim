@@ -1,4 +1,4 @@
-"$Id: vimcommander.vim,v 1.54.2.5 2004/03/28 14:23:06 lpenz Exp $
+"$Id: vimcommander.vim,v 1.54.2.6 2004/03/28 14:27:40 lpenz Exp $
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Name:         vimcommander
 " Description:  total-commander-like file manager for vim.
@@ -17,6 +17,8 @@
 "                    vimspell, from where I got how to autogenerate the 
 "                    help from within the script.
 "               Diego Morales, fixes and suggestions.
+"               Yves Rutschle, fixes and suggestions.
+"               Helmut Stiegler, fixes.
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Section: Documentation 
 "
@@ -1231,7 +1233,7 @@ if exists("b:vimcommander_install_doc") && b:vimcommander_install_doc==0
 end
 
 let s:revision=
-			\ substitute("$Revision: 1.54.2.5 $",'\$\S*: \([.0-9]\+\) \$','\1','')
+			\ substitute("$Revision: 1.54.2.6 $",'\$\S*: \([.0-9]\+\) \$','\1','')
 silent! let s:install_status =
 			\ <SID>SpellInstallDocumentation(expand('<sfile>:p'), s:revision)
 if (s:install_status == 1)
