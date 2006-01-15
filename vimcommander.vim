@@ -3,7 +3,7 @@
 " Author:  Leandro Penz
 " Date:    2003/11/01
 " Email:   lpenz AT terra DOT com DOT br
-" Version: $Id: vimcommander.vim,v 1.15 2003/11/07 01:47:19 lpenz Exp $
+" Version: $Id: vimcommander.vim,v 1.16 2003/11/07 02:28:21 lpenz Exp $
 "
 " Shameless using opsplorer.vim by Patrick Schiel.
 "
@@ -155,6 +155,8 @@ fu! <SID>InitMappings()
 	noremap <silent> <buffer> <C-F11> :cal <SID>SetMatchPattern()<CR>
 	noremap <silent> <buffer> <C-U> :cal <SID>ExchangeDirs()<CR>
 	noremap <silent> <buffer> <C-R> :cal <SID>RefreshDisplays()<CR>
+	noremap <silent> <buffer> <C-Left> :cal <SID>PutDir(0)<CR>
+	noremap <silent> <buffer> <C-Right> :cal <SID>PutDir(1)<CR>
 endf
 
 fu! <SID>InitCommonOptions()
@@ -321,6 +323,28 @@ fu! <SID>FileRename()
 	en
 endf
 
+fu! <SID>PutDir(dir)
+	let thisbuff=winbufnr(0)
+	if thisbuff == s:window_bufnrleft && a:dir==1
+		return
+	end
+	if thisbuff == s:window_bufnrright && a:dir==0
+		return
+	end
+	norm 1|g^
+	let xpos=col('.')-1
+	let ypos=line('.')
+	" check, if it's a directory
+	let path=<SID>GetPathName(xpos,ypos)
+	if !isdirectory(path)
+		return 
+	end
+	cal <SID>SwitchBuffer()
+	cal <SID>BuildTree(path)
+	cal <SID>SwitchBuffer()
+	cal <SID>RefreshDisplays()
+endf
+
 fu! <SID>ExchangeDirs()
 	let pathtmp=s:pathleft
 	let s:pathleft=s:pathright
@@ -337,10 +361,22 @@ fu! <SID>FileMove()
 	norm 1|g^
 	let filename=<SID>GetPathName(col('.')-1,line('.'))
 	let otherfilename=<SID>OtherPath().<SID>GetName(col('.')-1,line('.'))
-	if filereadable(filename)
+	if filereadable(filename) || isdirectory(filename)
 		let newfilename=input("Move to: ",otherfilename)
+		if filereadable(filename) && isdirectory(newfilename)
+			echo "Can't overwrite directory with file"
+			return
+		end
+		if isdirectory(filename) && filereadable(newfilename)
+			echo "Can't overwrite file with directory"
+			return
+		end
+		if isdirectory(filename) && isdirectory(newfilename)
+			echo "Can't overwrite directory with directory"
+			return
+		end
 		if filereadable(newfilename)
-			if input("File exists, overwrite?")=~"^[yY]"
+			if input("File exists, overwrite? ")=~"^[yY]"
 				" move file
 				let i=system('mv -f "'.filename.'" "'.newfilename.'"')
 			en
@@ -356,16 +392,24 @@ fu! <SID>FileCopy()
 	norm 1|g^
 	let filename=<SID>GetPathName(col('.')-1,line('.'))
 	let otherfilename=<SID>OtherPath().<SID>GetName(col('.')-1,line('.'))
-	if filereadable(filename)
+	if filereadable(filename) || isdirectory(filename)
 		let newfilename=input("Copy to: ",otherfilename)
+		if filereadable(filename) && isdirectory(newfilename)
+			echo "Can't overwrite directory with file"
+			return
+		end
+		if isdirectory(filename) && filereadable(newfilename)
+			echo "Can't overwrite file with directory"
+			return
+		end
 		if filereadable(newfilename)
-			if input("File exists, overwrite?")=~"^[yY]"
+			if input("File exists, overwrite? ")=~"^[yY]"
 				" copy file
-				let i=system('cp -f "'.filename.'" "'.newfilename.'"')
+				let i=system('cp -Rf "'.filename.'" "'.newfilename.'"')
 			en
 		el
 			" copy file
-			let i=system('cp "'.filename.'" "'.newfilename.'"')
+			let i=system('cp -Rf "'.filename.'" "'.newfilename.'"')
 		en
 		cal <SID>RefreshDisplays()
 	en
@@ -374,7 +418,7 @@ endf
 fu! <SID>FileDelete()
 	norm 1|g^
 	let filename=<SID>GetPathName(col('.')-1,line('.'))
-	if filereadable(filename)
+	if filereadable(filename) || isdirectory(filename)
 		if input("OK to delete ".fnamemodify(filename,":t")."? ","y")[0]=~"[yY]"
 			let i=system('rm -rf "'.filename.'"')
 			setl ma
@@ -386,7 +430,10 @@ endf
 
 fu! <SID>BuildParentTree()
 	norm gg$F/
+	let mydir=getline(line('.'))
+	let mypos="^+".strpart(mydir, strridx(mydir,'/')+1)."$"
 	cal <SID>OnDoubleClick(0)
+	call search(mypos)
 endf
 
 fu! <SID>GotoNextNode()
