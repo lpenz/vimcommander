@@ -1,4 +1,4 @@
-"$Id: vimcommander.vim,v 1.54.2.8 2005/05/12 02:13:10 lpenz Exp $
+"$Id: vimcommander.vim,v 1.54.2.9 2005/10/02 19:07:48 lpenz Exp $
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Name:         vimcommander
 " Description:  total-commander-like file manager for vim.
@@ -54,6 +54,7 @@ fu! <SID>CommanderMappings()
 	noremap <silent> <buffer> <F4>             :cal <SID>FileEdit()<CR>
 	noremap <silent> <buffer> <S-F4>           :cal <SID>NewFileEdit()<CR>
 	noremap <silent> <buffer> <leader><F4>     :cal <SID>NewFileEdit()<CR>
+	noremap <silent> <buffer> <leader>n        :cal <SID>NewFileEdit()<CR>
 	noremap <silent> <buffer> <F5>             :cal <SID>FileCopy()<CR>
 	noremap <silent> <buffer> <F6>             :cal <SID>FileMove()<CR>
 	noremap <silent> <buffer> <F7>             :cal <SID>DirCreate()<CR>
@@ -127,9 +128,6 @@ fu! <SID>VimCommanderShow()
 	end
 	"close all windows
 	let s:buffer_to_load=expand("%:p")
-	new
-	winc p
-	close
 	"let v:errmsg=''
 	"while v:errmsg==''
 	"	silent! close
@@ -142,6 +140,7 @@ fu! <SID>VimCommanderShow()
 	" create new window
 	let winsize=&lines
 	exe winsize." split VimCommanderRight"
+	resize +999
 	let s:bufnr_right=winbufnr(0)
 	" setup mappings, apply options, colors and draw tree
 	cal <SID>InitCommanderOptions()
@@ -158,8 +157,6 @@ fu! <SID>VimCommanderShow()
 	cal <SID>GotoEntry(s:line_left)
 	let g:vimcommander_loaded=1
 	"Goto vimcommander window
-	winc j
-	hide
 	let winnum = bufwinnr(s:bufnr_left)
 	if winnum != -1
 		" Jump to the existing window
@@ -218,17 +215,8 @@ fu! <SID>Close()
 		endif
 	endif
 	let s:line_right=line('.')
-	"silent! close
+	silent! close
 	let g:vimcommander_loaded=0
-	if strlen(s:buffer_to_load)>0
-		exe "edit +buffer ".s:buffer_to_load
-	else
-		if bufwinnr(s:bufnr_right)!=-1
-			exe "new +buffer ".s:buffer_to_load
-			exe 'wincmd w'
-			close
-		end
-	end
 	cal <SID>LoadOpts()
 endf
 
@@ -346,11 +334,9 @@ fu! <SID>FileEdit()
 		return
 	end
 	"cal <SID>ProvideBuffer()
-	"exe "edit ".path
 	let s:buffer_to_load=path
 	cal <SID>Close()
-	setl ma
-	setl noro
+	exe "edit ".path
 endf
 
 fu! <SID>NewFileEdit()
@@ -368,11 +354,9 @@ fu! <SID>NewFileEdit()
 		return
 	end
 	"cal <SID>ProvideBuffer()
-	"exe "edit ".newfile
 	let s:buffer_to_load=newfile
 	cal <SID>Close()
-	setlocal ma
-	setlocal noro
+	exe "edit ".newfile
 endf
 
 fu! <SID>MyPath()
@@ -1235,7 +1219,7 @@ if exists("b:vimcommander_install_doc") && b:vimcommander_install_doc==0
 end
 
 let s:revision=
-			\ substitute("$Revision: 1.54.2.8 $",'\$\S*: \([.0-9]\+\) \$','\1','')
+			\ substitute("$Revision: 1.54.2.9 $",'\$\S*: \([.0-9]\+\) \$','\1','')
 silent! let s:install_status =
 			\ <SID>SpellInstallDocumentation(expand('<sfile>:p'), s:revision)
 if (s:install_status == 1)
