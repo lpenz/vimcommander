@@ -1,4 +1,3 @@
-"$Id: vimcommander.vim,v 1.54.2.9 2005/10/02 19:07:48 lpenz Exp $
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Name:         vimcommander
 " Description:  total-commander-like file manager for vim.
