@@ -1,4 +1,4 @@
-"$Id: vimcommander.vim,v 1.51 2003/11/19 22:04:56 lpenz Exp $
+"$Id: vimcommander.vim,v 1.52 2003/11/19 22:07:05 lpenz Exp $
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Name:         vimcommander
 " Description:  total-commander-like file manager for vim.
@@ -1186,12 +1186,12 @@ fu! <SID>SpellInstallDocumentation(full_name, revision)
 	return 1
 endf
 
-if exists(b:vimcommander_install_doc) && b:vimcommander_install_doc==0
+if exists("b:vimcommander_install_doc") && b:vimcommander_install_doc==0
 	finish
 end
 
 let s:revision=
-			\ substitute("$Revision: 1.51 $",'\$\S*: \([.0-9]\+\) \$','\1','')
+			\ substitute("$Revision: 1.52 $",'\$\S*: \([.0-9]\+\) \$','\1','')
 silent! let s:install_status =
 			\ <SID>SpellInstallDocumentation(expand('<sfile>:p'), s:revision)
 if (s:install_status == 1)
