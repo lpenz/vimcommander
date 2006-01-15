@@ -3,14 +3,14 @@
 " Author:  Leandro Penz
 " Date:    2003/11/01
 " Email:   lpenz AT terra DOT com DOT br
-" Version: $Id: vimcommander.vim,v 1.6 2003/11/01 17:36:28 lpenz Exp $
+" Version: $Id: vimcommander.vim,v 1.7 2003/11/01 17:45:05 lpenz Exp $
 "
 " Shameless using opsplorer.vim by Patrick Schiel.
 "
 
 " setup command
 com! -nargs=* -complete=dir VimCommander cal VimCommander(<f-args>)
-"noremap <silent> <F11> :cal ToggleShowVimCommander()<CR>
+noremap <silent> <F11> :cal ToggleShowVimCommander()<CR>
 
 fu! ToggleShowVimCommander()
 	if exists("g:vimcommander_loaded")
@@ -117,8 +117,11 @@ fu! <SID>InitMappings()
 	noremap <silent> <buffer> O :cal <SID>FileMove()<CR>
 	noremap <silent> <buffer> H :cal <SID>ToggleShowHidden()<CR>
 	noremap <silent> <buffer> M :cal <SID>SetMatchPattern()<CR>
-
+	"total-cmd keys:
 	noremap <silent> <buffer> <TAB> :cal <SID>SwitchBuffer()<CR>
+	noremap <silent> <buffer> <DEL> :cal <SID>FileDelete()<CR>
+	noremap <silent> <buffer> <F5> :cal <SID>FileCopy()<CR>
+	noremap <silent> <buffer> <F6> :cal <SID>FileMove()<CR>
 endf
 
 fu! <SID>InitCommonOptions()
