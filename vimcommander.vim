@@ -1,4 +1,4 @@
-"$Id: vimcommander.vim,v 1.45 2003/11/16 22:50:06 lpenz Exp $
+"$Id: vimcommander.vim,v 1.46 2003/11/16 22:58:40 lpenz Exp $
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Name:         vimcommander
 " Description:  total-commander-like file manager for vim.
@@ -1121,7 +1121,7 @@ fu! <SID>SpellInstallDocumentation(full_name, revision)
 endf
 
 let s:revision=
-			\ substitute("$Revision: 1.45 $",'\$\S*: \([.0-9]\+\) \$','\1','')
+			\ substitute("$Revision: 1.46 $",'\$\S*: \([.0-9]\+\) \$','\1','')
 silent! let s:install_status =
 			\ <SID>SpellInstallDocumentation(expand('<sfile>:p'), s:revision)
 if (s:install_status == 1)
@@ -1150,11 +1150,11 @@ the terms of the GNU General Public License.  See
 ==============================================================================
 CONTENT                                                *vimcommander-contents* 
 
-    Installation            : |vimcommander-install|
-    VimCommander Intro      : |vimcommander|
-    VimCommander Keys       : |vimcommander-keys|
-    Todo list               : |vimcommander-todo|
-    VimCommander Links      : |vimcommander-links|
+    Installation                       : |vimcommander-install|
+    Intro                              : |vimcommander|
+    Keys                               : |vimcommander-keys|
+    Todo list                          : |vimcommander-todo|
+    Links                              : |vimcommander-links|
 
 ==============================================================================
 1. VimCommander Installation                            *vimcommander-install*
@@ -1181,11 +1181,19 @@ CONTENT                                                *vimcommander-contents*
     See also |vimcommander-links| for more information on this kind of
     file-manager.
 
+2.1 List of Features:                                  *vimcommander-features*
+---------------------
+    
+    - Two panels side-by-side;
+    - File operations work only on unix;
+    - File selection;
+    - Remembers settings;
+
 ==============================================================================
 3. VimCommander Keys                                       *vimcommander-keys*
 
     Most of VimCommander's key-bindings are similar to the other
-    commander-like's:
+    commanders':
 
     - TAB     = Go to the other panel;
     - F3      = View file under cursor;
@@ -1214,7 +1222,7 @@ CONTENT                                                *vimcommander-contents*
 4. VimCommander Todo                                       *vimcommander-todo*
 
     - Command-line.
-    - Options for some of the default behavior.
+    - Options for some of the behaviors.
 
 ==============================================================================
 5. VimCommander Links                                     *vimcommander-links*
