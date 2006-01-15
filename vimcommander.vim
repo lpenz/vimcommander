@@ -3,7 +3,7 @@
 " Author:  Leandro Penz
 " Date:    2003/11/01
 " Email:   lpenz AT terra DOT com DOT br
-" Version: $Id: vimcommander.vim,v 1.10 2003/11/07 00:30:36 lpenz Exp $
+" Version: $Id: vimcommander.vim,v 1.11 2003/11/07 00:45:21 lpenz Exp $
 "
 " Shameless using opsplorer.vim by Patrick Schiel.
 "
@@ -56,6 +56,14 @@ fu! VimCommander(...)
 	cal <SID>InitColors()
 	cal <SID>BuildTree(path2)
 	let g:vimcommander_loaded=1
+endf
+
+fu! <SID>MyPath(thisbuff)
+	if a:thisbuff == s:window_bufnrleft
+		return s:pathleft."/"
+	else
+		return s:pathright."/"
+	en
 endf
 
 fu! <SID>OtherPath(thisbuff)
@@ -125,6 +133,8 @@ fu! <SID>InitMappings()
 	noremap <silent> <buffer> <F7> :cal <SID>DirCreate()<CR>
 	noremap <silent> <buffer> <F10> :cal <SID>CloseExplorer()<CR>
 	noremap <silent> <buffer> <C-F11> :cal <SID>SetMatchPattern()<CR>
+	noremap <silent> <buffer> <C-U> :cal <SID>ExchangeDirs()<CR>
+	noremap <silent> <buffer> <C-R> :cal <SID>RefreshDisplays()<CR>
 endf
 
 fu! <SID>InitCommonOptions()
@@ -273,17 +283,27 @@ fu! <SID>FileRename()
 				setl ma
 				let i=system("mv -f ".filename." ".newfilename)
 				" refresh display
-				norm gg$
-				cal <SID>OnDoubleClick(-1)
+				cal <SID>RefreshDisplays()
 			en
 		el
 			" rename file
 			setl ma
 			let i=system("mv ".filename." ".newfilename)
-			norm gg$
-			cal <SID>OnDoubleClick(-1)
+			cal <SID>RefreshDisplays()
 		en
 	en
+endf
+
+fu! <SID>ExchangeDirs()
+	let pathtmp=s:pathleft
+	let s:pathleft=s:pathright
+	let s:pathright=pathtmp
+	let myline=line('.')
+	cal <SID>BuildTree(<SID>MyPath(winbufnr(0)))
+	cal <SID>SwitchBuffer()
+	cal <SID>BuildTree(<SID>MyPath(winbufnr(0)))
+	exec myline
+	cal <SID>RefreshDisplays()
 endf
 
 fu! <SID>FileMove()
