@@ -3,7 +3,7 @@
 " Author:  Leandro Penz
 " Date:    2003/11/01
 " Email:   lpenz AT terra DOT com DOT br
-" Version: $Id: vimcommander.vim,v 1.4 2003/11/01 16:50:29 lpenz Exp $
+" Version: $Id: vimcommander.vim,v 1.5 2003/11/01 16:51:50 lpenz Exp $
 "
 " Heavily based on opsplorer.vim by Patrick Schiel.
 "
@@ -296,8 +296,9 @@ endf
 fu! FileCopy()
 	norm 1|g^
 	let filename=GetPathName(col('.')-1,line('.'))
+	let otherfilename=OtherPath(winbufnr(0)).GetName(col('.')-1,line('.'))
 	if filereadable(filename)
-		let newfilename=input("Copy to: ",filename)
+		let newfilename=input("Copy to: ",otherfilename)
 		if filereadable(newfilename)
 			if input("File exists, overwrite?")=~"^[yY]"
 				" copy file
@@ -310,8 +311,7 @@ fu! FileCopy()
 			" copy file
 			let i=system("cp ".filename." ".newfilename)
 			" refresh display
-			norm gg$
-			cal OnDoubleClick(-1)
+			cal RefreshDisplay()
 		en
 	en
 endf
