@@ -4,7 +4,7 @@
 " Author:  Leandro Penz
 " Date:    2003/11/01
 " Email:   lpenz AT terra DOT com DOT br
-" Version: $Id: vimcommander.vim,v 1.36 2003/11/12 23:04:19 lpenz Exp $
+" Version: $Id: vimcommander.vim,v 1.37 2003/11/12 23:30:49 lpenz Exp $
 "
 " Shameless using opsplorer.vim by Patrick Schiel.
 "
@@ -65,6 +65,7 @@ fu! VimCommanderToggle()
 endf
 
 fu!<SID>First()
+	cal <SID>SaveOpts()
 	cal <SID>InitOptions()
 	let s:path_left=getcwd()
 	let s:path_right=getcwd()
@@ -150,8 +151,51 @@ fu! <SID>Close()
 	let g:vimcommander_loaded=0
 	if bufwinnr("VimCommanderRight")!=-1
 		exe "new +buffer ".s:orig_buffer
+		cal <SID>LoadOpts()
 		exe 'wincmd w'
 		close
+	end
+endf
+
+fu! <SID>SaveOpts()
+	let s:scrollbind=&scrollbind
+	let s:wrap=&wrap
+	let s:nu=&nu
+	let s:buflisted=&buflisted
+	let s:number=&number
+	let s:incsearch=&incsearch
+endf
+
+fu! <SID>LoadOpts()
+	if s:scrollbind==1
+		set scrollbind
+	else
+		set noscrollbind
+	end
+	if s:wrap==1
+		set wrap
+	else
+		set nowrap
+	end
+	if s:nu==1
+		set nu
+	else
+		set nonu
+	end
+	if s:buflisted==1
+		set buflisted
+	else
+		set nobuflisted
+	end
+	if s:number==1
+		set number
+	else
+		set nonumber
+	end
+	if s:incsearch==1
+		set incsearch
+	else
+		set noincsearch
 	end
 endf
 
@@ -245,6 +289,7 @@ endf
 fu! <SID>ProvideBuffer()
 	"winc j
 	new
+	cal <SID>LoadOpts()
 endf
 
 fu! <SID>FileView()
