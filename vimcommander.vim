@@ -4,7 +4,7 @@
 " Author:  Leandro Penz
 " Date:    2003/11/01
 " Email:   lpenz AT terra DOT com DOT br
-" Version: $Id: vimcommander.vim,v 1.30 2003/11/09 16:35:05 lpenz Exp $
+" Version: $Id: vimcommander.vim,v 1.31 2003/11/09 16:47:51 lpenz Exp $
 "
 " Shameless using opsplorer.vim by Patrick Schiel.
 "
@@ -393,6 +393,7 @@ fu! <SID>FileCopy()
 		let filename=<SID>PathUnderCursor()
 		let otherfilename=<SID>OtherPath().<SID>FilenameUnderCursor()
 	end
+	let opt="y"
 	while strlen(name)>0
 		if filereadable(filename) || isdirectory(filename)
 			if strlen(b:vimcommander_selected)==0
@@ -409,7 +410,13 @@ fu! <SID>FileCopy()
 				return
 			end
 			if filereadable(newfilename)
-				if input("File ".newfilename." exists, overwrite? ")=~"^[yY]"
+				if opt!~"^[AakK]$"
+					let opt=input("File ".newfilename." exists, overwrite? ","y")
+					if opt==""
+						return
+					end
+				end
+				if opt=~"^[yYAa]$"
 					" copy file
 					cal system('cp -Rf "'.filename.'" "'.newfilename.'"')
 				en
@@ -443,6 +450,7 @@ fu! <SID>FileMove()
 		let filename=<SID>PathUnderCursor()
 		let otherfilename=<SID>OtherPath().<SID>FilenameUnderCursor()
 	end
+	let opt='y'
 	while strlen(name)>0
 		if filereadable(filename) || isdirectory(filename)
 			if strlen(b:vimcommander_selected)==0
@@ -463,7 +471,13 @@ fu! <SID>FileMove()
 				return
 			end
 			if filereadable(newfilename)
-				if input("File exists, overwrite? ")=~"^[yY]"
+				if opt!~"^[AakK]$"
+					let opt=input("File ".newfilename." exists, overwrite? ","y")
+					if opt==""
+						return
+					end
+				end
+				if opt=~"^[yYAa]$"
 					" move file
 					system('mv -f "'.filename.'" "'.newfilename.'"')
 				en
@@ -495,9 +509,16 @@ fu! <SID>FileDelete()
 		let name=" "
 		let filename=<SID>PathUnderCursor()
 	end
+	let opt=""
 	while strlen(name)>0
 		if filereadable(filename) || isdirectory(filename)
-			if input("OK to delete ".fnamemodify(filename,":t")."? ","y")[0]=~"[yY]"
+			if opt!~"^[Aa]$"
+				let opt=input("OK to delete ".fnamemodify(filename,":t")."? ","y")
+				if opt==""
+					return
+				end
+			end
+			if opt=~"^[yYAa]$"
 				cal system('rm -rf "'.filename.'"')
 			en
 		en
