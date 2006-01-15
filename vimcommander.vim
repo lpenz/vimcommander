@@ -1,9 +1,10 @@
 " vimcommander - (hopefully) vim + totalcommander-like file explorer for vim
+" vim: fdm=marker foldmarker=fu!,endf
 "
 " Author:  Leandro Penz
 " Date:    2003/11/01
 " Email:   lpenz AT terra DOT com DOT br
-" Version: $Id: vimcommander.vim,v 1.25 2003/11/08 03:37:21 lpenz Exp $
+" Version: $Id: vimcommander.vim,v 1.26 2003/11/08 04:21:39 lpenz Exp $
 "
 " Shameless using opsplorer.vim by Patrick Schiel.
 "
@@ -292,6 +293,7 @@ endf
 
 fu! <SID>BuildTree(path)
 	let path=a:path
+	let b:vimcommander_selected=""
 	" clean up
 	setl ma
 	norm ggVGxo
@@ -369,69 +371,138 @@ fu! <SID>NameUnderCursor()
 endf
 
 fu! <SID>FileCopy()
-	let filename=<SID>PathUnderCursor()
-	let otherfilename=<SID>OtherPath().<SID>NameUnderCursor()
-	if filereadable(filename) || isdirectory(filename)
-		let newfilename=input("Copy to: ",otherfilename)
-		if filereadable(filename) && isdirectory(newfilename)
-			echo "Can't overwrite directory with file"
-			return
-		end
-		if isdirectory(filename) && filereadable(newfilename)
-			echo "Can't overwrite file with directory"
-			return
-		end
-		if filereadable(newfilename)
-			if input("File exists, overwrite? ")=~"^[yY]"
+	let i=0
+	if strlen(b:vimcommander_selected)>0
+		echo b:vimcommander_selected
+		let name=<SID>SelectedNum(b:vimcommander_selected, i)
+		let filename=<SID>MyPath().name
+		let otherfilename=<SID>OtherPath().name
+		let i=i+1
+	else
+		let name=" "
+		let filename=<SID>PathUnderCursor()
+		let otherfilename=<SID>OtherPath().<SID>NameUnderCursor()
+	end
+	while strlen(name)>0
+		if filereadable(filename) || isdirectory(filename)
+			if strlen(b:vimcommander_selected)==0
+				let newfilename=input("Copy ".filename." to: ",otherfilename)
+			else
+				let newfilename=otherfilename
+			end
+			if filereadable(filename) && isdirectory(newfilename)
+				echo "Can't overwrite directory ".newfilename." with file"
+				return
+			end
+			if isdirectory(filename) && filereadable(newfilename)
+				echo "Can't overwrite file ".newfilename." with directory"
+				return
+			end
+			if filereadable(newfilename)
+				if input("File ".newfilename." exists, overwrite? ")=~"^[yY]"
+					" copy file
+					cal system('cp -Rf "'.filename.'" "'.newfilename.'"')
+				en
+			el
 				" copy file
-				let i=system('cp -Rf "'.filename.'" "'.newfilename.'"')
+				cal system('cp -Rf "'.filename.'" "'.newfilename.'"')
 			en
-		el
-			" copy file
-			let i=system('cp -Rf "'.filename.'" "'.newfilename.'"')
 		en
-		cal <SID>RefreshDisplays()
-	en
+		if strlen(b:vimcommander_selected)>0
+			let name=<SID>SelectedNum(b:vimcommander_selected, i)
+			let filename=<SID>MyPath().name
+			let otherfilename=<SID>OtherPath().name
+			let i=i+1
+		else
+			let name=""
+		end
+	endwhile
+	let b:vimcommander_selected=""
+	cal <SID>RefreshDisplays()
 endf
 
 fu! <SID>FileMove()
-	let filename=<SID>PathUnderCursor()
-	let otherfilename=<SID>OtherPath().<SID>NameUnderCursor()
-	if filereadable(filename) || isdirectory(filename)
-		let newfilename=input("Move to: ",otherfilename)
-		if filereadable(filename) && isdirectory(newfilename)
-			echo "Can't overwrite directory with file"
-			return
-		end
-		if isdirectory(filename) && filereadable(newfilename)
-			echo "Can't overwrite file with directory"
-			return
-		end
-		if isdirectory(filename) && isdirectory(newfilename)
-			echo "Can't overwrite directory with directory"
-			return
-		end
-		if filereadable(newfilename)
-			if input("File exists, overwrite? ")=~"^[yY]"
+	let i=0
+	if strlen(b:vimcommander_selected)>0
+		echo b:vimcommander_selected
+		let name=<SID>SelectedNum(b:vimcommander_selected, i)
+		let filename=<SID>MyPath().name
+		let otherfilename=<SID>OtherPath().name
+		let i=i+1
+	else
+		let name=" "
+		let filename=<SID>PathUnderCursor()
+		let otherfilename=<SID>OtherPath().<SID>NameUnderCursor()
+	end
+	while strlen(name)>0
+		if filereadable(filename) || isdirectory(filename)
+			if strlen(b:vimcommander_selected)==0
+				let newfilename=input("Move ".filename." to: ",otherfilename)
+			else
+				let newfilename=otherfilename
+			end
+			if filereadable(filename) && isdirectory(newfilename)
+				echo "Can't overwrite directory with file"
+				return
+			end
+			if isdirectory(filename) && filereadable(newfilename)
+				echo "Can't overwrite file with directory"
+				return
+			end
+			if isdirectory(filename) && isdirectory(newfilename)
+				echo "Can't overwrite directory with directory"
+				return
+			end
+			if filereadable(newfilename)
+				if input("File exists, overwrite? ")=~"^[yY]"
+					" move file
+					system('mv -f "'.filename.'" "'.newfilename.'"')
+				en
+			el
 				" move file
-				let i=system('mv -f "'.filename.'" "'.newfilename.'"')
+				system('mv "'.filename.'" "'.newfilename.'"')
 			en
-		el
-			" move file
-			let i=system('mv "'.filename.'" "'.newfilename.'"')
 		en
-		cal <SID>RefreshDisplays()
-	en
+		if strlen(b:vimcommander_selected)>0
+			let name=<SID>SelectedNum(b:vimcommander_selected, i)
+			let filename=<SID>MyPath().name
+			let otherfilename=<SID>OtherPath().name
+			let i=i+1
+		else
+			let name=""
+		end
+	endwhile
+	let b:vimcommander_selected=""
+	cal <SID>RefreshDisplays()
 endf
 
 fu! <SID>FileDelete()
-	let filename=<SID>PathUnderCursor()
-	if filereadable(filename) || isdirectory(filename)
-		if input("OK to delete ".fnamemodify(filename,":t")."? ","y")[0]=~"[yY]"
-			let i=system('rm -rf "'.filename.'"')
-			cal <SID>RefreshDisplays()
+	let i=0
+	if strlen(b:vimcommander_selected)>0
+		echo b:vimcommander_selected
+		let name=<SID>SelectedNum(b:vimcommander_selected, i)
+		let filename=<SID>MyPath().name
+		let i=i+1
+	else
+		let name=" "
+		let filename=<SID>PathUnderCursor()
+	end
+	while strlen(name)>0
+		if filereadable(filename) || isdirectory(filename)
+			if input("OK to delete ".fnamemodify(filename,":t")."? ","y")[0]=~"[yY]"
+				cal system('rm -rf "'.filename.'"')
+			en
 		en
-	en
+		if strlen(b:vimcommander_selected)>0
+			let name=<SID>SelectedNum(b:vimcommander_selected, i)
+			let filename=<SID>MyPath().name
+			let i=i+1
+		else
+			let name=""
+		end
+	endwhile
+	let b:vimcommander_selected=""
+	cal <SID>RefreshDisplays()
 endf
 
 fu! <SID>PutDir()
@@ -477,7 +548,7 @@ fu! <SID>SelectedNum(str,idx)
 			return ""
 		end
 		let mystr=strpart(mystr, pos)
-		let i=+1
+		let i=i+1
 	endwh
 	let pos=stridx(mystr, ">")
 	let mystr=strpart(mystr, 1, pos-1)
@@ -845,5 +916,4 @@ fu! <SID>SpaceString(width)
 	retu spacer
 endf
 
-" vim: fdm=marker foldmarker=fu!,endf
 
