@@ -1,14 +1,33 @@
-" vimcommander - (hopefully) vim + totalcommander-like file explorer for vim
-" vim: fdm=marker foldmarker=fu!,endf
+"$Id: vimcommander.vim,v 1.42 2003/11/16 17:41:52 lpenz Exp $
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Name:            vimcommander
+" Description:    total-commander-like file manager for vim.
+" Author:         Leandro Penz <lpenz AT terra DOT com DOT br>
+" Maintainer:     Leandro Penz <lpenz AT terra DOT com DOT br>
+" Url:            http://www.vim.org/scripts/script.php?script_id=808
+" Licence:        This program is free software; you can redistribute it
+"                   and/or modify it under the terms of the GNU General Public
+"                   License.  See http://www.gnu.org/copyleft/gpl.txt
 "
-" Author:  Leandro Penz
-" Date:    2003/11/01
-" Email:   lpenz AT terra DOT com DOT br
-" Version: $Id: vimcommander.vim,v 1.41 2003/11/15 14:56:25 lpenz Exp $
+" Credits:        Patrick Schiel, the author of Opsplorer.vim 
+"                   (http://www.vim.org/scripts/script.php?script_id=362)
+"                   in which this script is based,
+"               Christian Ghisler, the author of Total Commander, for the best
+"                   *-commander around. (http://www.ghisler.com)
+"                Mathieu Clabaut <mathieu.clabaut@free.fr>, the author of
+"                    vimspell, from where I got how to autogenerate the 
+"                    help from within the script.
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Section: Documentation 
 "
-" Shameless using opsplorer.vim by Patrick Schiel.
+" Documentation should be available by ":help vimcommander" command, once the
+" script has been copied in you .vim/plugin directory.
 "
-
+" The documentation is still available at the end of the script.
+"
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Section: Code
+"
 
 fu! <SID>CommanderMappings()
 	"opsplorer legacy:
@@ -1085,5 +1104,218 @@ fu! <SID>SpaceString(width)
 	endw
 	retu spacer
 endf
+ 
+fu! <SID>SpellInstallDocumentation(full_name, revision)
+	" Name of the document path based on the system we use:
+	if (has("unix"))
+		" On UNIX like system, using forward slash:
+		let l:slash_char = '/'
+		let l:mkdir_cmd  = ':silent !mkdir -p '
+	else
+		" On M$ system, use backslash. Also mkdir syntax is different.
+		" This should only work on W2K and up.
+		let l:slash_char = '\'
+		let l:mkdir_cmd  = ':silent !mkdir '
+	endif
 
+	let l:doc_path = l:slash_char . 'doc'
+	let l:doc_home = l:slash_char . '.vim' . l:slash_char . 'doc'
+
+	" Figure out document path based on full name of this script:
+	let l:vim_plugin_path = fnamemodify(a:full_name, ':h')
+	let l:vim_doc_path    = fnamemodify(a:full_name, ':h:h') . l:doc_path
+	if (!(filewritable(l:vim_doc_path) == 2))
+		echomsg "Doc path: " . l:vim_doc_path
+		execute l:mkdir_cmd . l:vim_doc_path
+		if (!(filewritable(l:vim_doc_path) == 2))
+			" Try a default configuration in user home:
+			let l:vim_doc_path = expand("~") . l:doc_home
+			if (!(filewritable(l:vim_doc_path) == 2))
+				execute l:mkdir_cmd . l:vim_doc_path
+				if (!(filewritable(l:vim_doc_path) == 2))
+					" Put a warning:
+					echomsg "Unable to open documentation directory"
+					echomsg " type :help add-local-help for more informations."
+					return 0
+				endif
+			endif
+		endif
+	endif
+
+	" Exit if we have problem to access the document directory:
+	if (!isdirectory(l:vim_plugin_path)
+				\ || !isdirectory(l:vim_doc_path)
+				\ || filewritable(l:vim_doc_path) != 2)
+		return 0
+	endif
+
+	" Full name of script and documentation file:
+	let l:script_name = fnamemodify(a:full_name, ':t')
+	let l:doc_name    = fnamemodify(a:full_name, ':t:r') . '.txt'
+	let l:plugin_file = l:vim_plugin_path . l:slash_char . l:script_name
+	let l:doc_file    = l:vim_doc_path    . l:slash_char . l:doc_name
+
+	" Bail out if document file is still up to date:
+	if (filereadable(l:doc_file)  &&
+				\ getftime(l:plugin_file) < getftime(l:doc_file))
+		return 0
+	endif
+
+	" Prepare window position restoring command:
+	if (strlen(@%))
+		let l:go_back = 'b ' . bufnr("%")
+	else
+		let l:go_back = 'enew!'
+	endif
+
+	" Create a new buffer & read in the plugin file (me):
+	setl nomodeline
+	exe 'enew!'
+	exe 'r ' . l:plugin_file
+
+	setl modeline
+	let l:buf = bufnr("%")
+	setl noswapfile modifiable
+
+	norm zR
+	norm gg
+
+	" Delete from first line to a line starts with
+	" === START_DOC
+	1,/^=\{3,}\s\+START_DOC\C/ d
+
+	" Delete from a line starts with
+	" === END_DOC
+	" to the end of the documents:
+	/^=\{3,}\s\+END_DOC\C/,$ d
+
+	" Remove fold marks:
+	% s/{\{3}[1-9]/    /
+
+	" Add modeline for help doc: the modeline string is mangled intentionally
+	" to avoid it be recognized by VIM:
+	call append(line('$'), '')
+	call append(line('$'), ' v' . 'im:tw=78:ts=8:ft=help:norl:')
+
+	" Replace revision:
+	exe "normal :1s/#version#/ v" . a:revision . "/\<CR>"
+
+	" Save the help document:
+	exe 'w! ' . l:doc_file
+	exe l:go_back
+	exe 'bw ' . l:buf
+
+	" Build help tags:
+	exe 'helptags ' . l:vim_doc_path
+
+	return 1
+endf
+
+let s:revision=
+			\ substitute("$Revision: 1.42 $",'\$\S*: \([.0-9]\+\) \$','\1','')
+silent! let s:install_status =
+			\ <SID>SpellInstallDocumentation(expand('<sfile>:p'), s:revision)
+if (s:install_status == 1)
+	echom expand("<sfile>:t:r") . ' v' . s:revision .
+				\ ': Help-documentation installed.'
+endif
+
+
+finish
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Section: Documentation Contents
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+=== START_DOC
+*vimcommander.txt*   total-commander-like file-manager for vim.      #version#
+
+
+                        VIMCOMMANDER REFERENCE MANUAL~
+
+
+File-manager for vim.
+
+==============================================================================
+CONTENT                                                *vimcommander-contents* 
+
+    Installation            : |vimcommander-install|
+    VimCommander Intro      : |vimcommander|
+    VimCommander Commands   : |vimcommander-commands|
+    Todo list               : |vimcommander-todo|
+    VimCommander Links      : |vimcommander-links|
+
+==============================================================================
+1. VimCommander Installation                            *vimcommander-install*
+
+    In order to install the plugin, place the vimcommander.vim file into a plugin
+    directory in your runtime path (please see |add-global-plugin| and
+    |'runtimepath'|).
+
+    A key-map should also be made. Put in your |.vimrc| something like: >
+        noremap <silent> <F11> :cal VimCommanderToggle()<CR>
+<
+
+==============================================================================
+2. VimCommander Intro                                           *vimcommander*
+
+    This is VimCommander, a two-panel file-manager for vim.
+
+    Upon entrance, the two panels are presented. Operations are performed by
+    default from one panel to the other.
+
+    File selection is implemented also, see |vimcommander-commands| for the
+    keyboard shortcuts.
+
+    See also |vimcommander-links| for more information on this kind of
+    file-manager.
+
+==============================================================================
+3. VimCommander Commands                               *vimcommander-commands*
+
+    Most of VimCommander's key-bindings are similar to the other
+    commander-like's:
+
+    - TAB     = Go to the other panel;
+    - F3      = View file under cursor;
+    - F4      = Edit file under cursor;
+    - F5      = Copy file;
+    - F6      = Move/rename file;
+    - F7      = Create directory;
+    - F8/DEL  = Remove file;
+    - F10     = Quit VimCommander;
+    - C-R     = Refresh panels;
+    - C-U     = Exchange panels;
+    - C-Left  = Put directory under cursor on other panel, or grab
+              = other panel's dir;
+    - C-Right = Same;
+    - INS     = Select file under cursor;
+    - "+"     = Select file by pattern;
+    - "-"     = De-select file by pattern;
+    - S-F4    = Edit new file.
+
+    C-* stands for CTRL+*. S-* stands for SHIFT+*.
+    As some terminals do not support SHIFT/CTRL+non-letter-key, a <leader>
+    version has been provided.
+    So, <leader>Right and C-Right are the same.
+
+==============================================================================
+4. VimCommander Todo                                       *vimcommander-todo*
+
+    - Command-line.
+    - Options for some of the default behavior.
+
+==============================================================================
+5. VimCommander Links                                     *vimcommander-links*
+
+    http://www.vim.org/scripts/script.php?script_id=808
+        Home page of VimCommander.
+    http://www.softpanorama.org/OFM
+        Page dedicated to the commander-like file-managers - called OFM's by
+        the author.
+    http://www.ghisler.com
+        The best commander-like around.
+
+=== END_DOC
+
+" vim: fdm=marker foldmarker=fu!,endf
 
