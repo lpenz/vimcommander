@@ -1,20 +1,19 @@
-"$Id: vimcommander.vim,v 1.42 2003/11/16 17:41:52 lpenz Exp $
+"$Id: vimcommander.vim,v 1.43 2003/11/16 20:01:11 lpenz Exp $
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Name:            vimcommander
-" Description:    total-commander-like file manager for vim.
-" Author:         Leandro Penz <lpenz AT terra DOT com DOT br>
-" Maintainer:     Leandro Penz <lpenz AT terra DOT com DOT br>
-" Url:            http://www.vim.org/scripts/script.php?script_id=808
-" Licence:        This program is free software; you can redistribute it
+" Name:         vimcommander
+" Description:  total-commander-like file manager for vim.
+" Author:       Leandro Penz <lpenz AT terra DOT com DOT br>
+" Maintainer:   Leandro Penz <lpenz AT terra DOT com DOT br>
+" Url:          http://www.vim.org/scripts/script.php?script_id=808
+" Licence:      This program is free software; you can redistribute it
 "                   and/or modify it under the terms of the GNU General Public
 "                   License.  See http://www.gnu.org/copyleft/gpl.txt
-"
-" Credits:        Patrick Schiel, the author of Opsplorer.vim 
+" Credits:      Patrick Schiel, the author of Opsplorer.vim 
 "                   (http://www.vim.org/scripts/script.php?script_id=362)
 "                   in which this script is based,
 "               Christian Ghisler, the author of Total Commander, for the best
 "                   *-commander around. (http://www.ghisler.com)
-"                Mathieu Clabaut <mathieu.clabaut@free.fr>, the author of
+"               Mathieu Clabaut <mathieu.clabaut@free.fr>, the author of
 "                    vimspell, from where I got how to autogenerate the 
 "                    help from within the script.
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -30,10 +29,8 @@
 "
 
 fu! <SID>CommanderMappings()
-	"opsplorer legacy:
 	noremap <silent> <buffer> <LeftRelease> :cal <SID>OnClick()<CR>
 	noremap <silent> <buffer> <2-LeftMouse> :cal <SID>OnDoubleClick(-1)<CR>
-	noremap <silent> <buffer> <Space> :cal <SID>OnDoubleClick(0)<CR>
 	noremap <silent> <buffer> <CR> :cal <SID>OnDoubleClick(1)<CR>
 	noremap <silent> <buffer> <Down> :cal <SID>GotoNextEntry()<CR>
 	noremap <silent> <buffer> <Up> :cal <SID>GotoPrevEntry()<CR>
@@ -392,7 +389,7 @@ fu! <SID>BuildTree(path)
 	let b:vimcommander_selected=""
 	" clean up
 	setl ma
-	norm ggVGxo
+	norm ggVG"_xo
 	" check if no unneeded trailing / is there
 	if strlen(path)>1&&path[strlen(path)-1]=="/"
 		let path=strpart(path,0,strlen(path)-1)
@@ -1212,7 +1209,7 @@ fu! <SID>SpellInstallDocumentation(full_name, revision)
 endf
 
 let s:revision=
-			\ substitute("$Revision: 1.42 $",'\$\S*: \([.0-9]\+\) \$','\1','')
+			\ substitute("$Revision: 1.43 $",'\$\S*: \([.0-9]\+\) \$','\1','')
 silent! let s:install_status =
 			\ <SID>SpellInstallDocumentation(expand('<sfile>:p'), s:revision)
 if (s:install_status == 1)
@@ -1235,12 +1232,16 @@ finish
 
 File-manager for vim.
 
+This program is free software; you can redistribute it and/or modify it under
+the terms of the GNU General Public License.  See
+    http://www.gnu.org/copyleft/gpl.txt
+
 ==============================================================================
 CONTENT                                                *vimcommander-contents* 
 
     Installation            : |vimcommander-install|
     VimCommander Intro      : |vimcommander|
-    VimCommander Commands   : |vimcommander-commands|
+    VimCommander Keys       : |vimcommander-keys|
     Todo list               : |vimcommander-todo|
     VimCommander Links      : |vimcommander-links|
 
@@ -1263,14 +1264,14 @@ CONTENT                                                *vimcommander-contents*
     Upon entrance, the two panels are presented. Operations are performed by
     default from one panel to the other.
 
-    File selection is implemented also, see |vimcommander-commands| for the
+    File selection is implemented also, see |vimcommander-keys| for the
     keyboard shortcuts.
 
     See also |vimcommander-links| for more information on this kind of
     file-manager.
 
 ==============================================================================
-3. VimCommander Commands                               *vimcommander-commands*
+3. VimCommander Keys                                       *vimcommander-keys*
 
     Most of VimCommander's key-bindings are similar to the other
     commander-like's:
