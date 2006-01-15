@@ -3,7 +3,7 @@
 " Author:  Leandro Penz
 " Date:    2003/11/01
 " Email:   lpenz AT terra DOT com DOT br
-" Version: $Id: vimcommander.vim,v 1.16 2003/11/07 02:28:21 lpenz Exp $
+" Version: $Id: vimcommander.vim,v 1.17 2003/11/07 23:11:11 lpenz Exp $
 "
 " Shameless using opsplorer.vim by Patrick Schiel.
 "
@@ -13,16 +13,22 @@ com! -nargs=* -complete=dir VimCommander cal VimCommander(<f-args>)
 
 fu! ToggleShowVimCommander()
 	if exists("g:vimcommander_loaded")
-		exe s:window_bufnrleft."bd"
-		exe s:window_bufnrright."bd"
-		unl g:vimcommander_loaded
+		if(g:vimcommander_loaded==1) " its on screen
+			exe s:window_bufnrleft."bd"
+			exe s:window_bufnrright."bd"
+			let g:vimcommander_loaded=0
+		el
+			cal VimCommander()
+		end
 	el
+		let g:vimcommander_leftpath=getcwd()
+		let g:vimcommander_rightpath=getcwd()
 		cal VimCommander()
 	en
 endf
 
 fu! GotoVimCommander()
-	if exists("g:vimcommander_loaded")
+	if exists("g:vimcommander_loaded") && g:vimcommander_loaded==1
 		let winnum = bufwinnr(g:vimcommander_lastwindow)
 		if winnum != -1
 			" Jump to the existing window
@@ -35,23 +41,7 @@ fu! GotoVimCommander()
 	en
 endf
 
-fu! VimCommander(...)
-	" create explorer window
-	" take argument as path, if given
-	if a:0>0
-		let path=a:1
-	el
-		" otherwise current dir
-		let path=getcwd()
-	en
-	" substitute leading ~
-	" (doesn't work with isdirectory() otherwise!)
-	let path=fnamemodify(path,":p")
-	" expand, if relative path
-	if path[0]!="/"
-		let path=getcwd()."/".path
-	en
-	let path2=path
+fu! VimCommander()
 	" setup options
 	cal <SID>InitOptions()
 	" create new window
@@ -62,14 +52,14 @@ fu! VimCommander(...)
 	cal <SID>InitCommonOptions()
 	cal <SID>InitMappings()
 	cal <SID>InitColors()
-	cal <SID>BuildTree(path)
+	cal <SID>BuildTree(g:vimcommander_leftpath)
 	exe "vs VimCommanderLeft"
 	let s:window_bufnrright=winbufnr(0)
 	let g:vimcommander_lastwindow="VimCommanderLeft"
 	cal <SID>InitCommonOptions()
 	cal <SID>InitMappings()
 	cal <SID>InitColors()
-	cal <SID>BuildTree(path2)
+	cal <SID>BuildTree(g:vimcommander_rightpath)
 	let g:vimcommander_loaded=1
 	autocmd BufEnter VimCommanderLeft let g:vimcommander_lastwindow="VimCommanderLeft"
 	autocmd BufEnter VimCommanderRight let g:vimcommander_lastwindow="VimCommanderRight"
@@ -78,18 +68,18 @@ endf
 fu! <SID>MyPath()
 	let thisbuff=winbufnr(0)
 	if thisbuff == s:window_bufnrleft
-		return s:pathleft."/"
+		return g:vimcommander_leftpath."/"
 	else
-		return s:pathright."/"
+		return g:vimcommander_rightpath."/"
 	en
 endf
 
 fu! <SID>OtherPath()
 	let thisbuff=winbufnr(0)
 	if thisbuff == s:window_bufnrleft
-		return s:pathright."/"
+		return g:vimcommander_rightpath."/"
 	else
-		return s:pathleft."/"
+		return g:vimcommander_leftpath."/"
 	en
 endf
 
@@ -146,12 +136,12 @@ fu! <SID>InitMappings()
 	noremap <silent> <buffer> <TAB> :cal <SID>SwitchBuffer()<CR>
 	noremap <silent> <buffer> <DEL> :cal <SID>FileDelete()<CR>
 	noremap <silent> <buffer> <F3> :cal <SID>OnDoubleClick(2)<CR>
-	noremap <silent> <buffer> <F4> :cal <SID>OnDoubleClick(0)<CR>
+	noremap <silent> <buffer> <F4> :cal <SID>OnDoubleClick(1)<CR>
 	noremap <silent> <buffer> <F5> :cal <SID>FileCopy()<CR>
 	noremap <silent> <buffer> <F6> :cal <SID>FileMove()<CR>
 	noremap <silent> <buffer> <F7> :cal <SID>DirCreate()<CR>
 	noremap <silent> <buffer> <F10> :cal <SID>CloseExplorer()<CR>
-	noremap <silent> <buffer> <F11> <C-W>j
+	noremap <silent> <buffer> <F11> :cal ToggleShowVimCommander()<CR>
 	noremap <silent> <buffer> <C-F11> :cal <SID>SetMatchPattern()<CR>
 	noremap <silent> <buffer> <C-U> :cal <SID>ExchangeDirs()<CR>
 	noremap <silent> <buffer> <C-R> :cal <SID>RefreshDisplays()<CR>
@@ -250,9 +240,9 @@ fu! <SID>BuildTree(path)
 		let path=strpart(path,0,strlen(path)-1)
 	en
 	if(winbufnr(0)==s:window_bufnrleft)
-		let s:pathleft=path
+		let g:vimcommander_leftpath=path
 	else
-		let s:pathright=path
+		let g:vimcommander_rightpath=path
 	end
 	cal setline(1,path)
 	setl noma nomod
@@ -346,9 +336,9 @@ fu! <SID>PutDir(dir)
 endf
 
 fu! <SID>ExchangeDirs()
-	let pathtmp=s:pathleft
-	let s:pathleft=s:pathright
-	let s:pathright=pathtmp
+	let pathtmp=g:vimcommander_leftpath
+	let g:vimcommander_leftpath=g:vimcommander_rightpath
+	let g:vimcommander_rightpath=pathtmp
 	let myline=line('.')
 	cal <SID>BuildTree(<SID>MyPath())
 	cal <SID>SwitchBuffer()
@@ -542,10 +532,12 @@ fu! <SID>OnDoubleClick(close_explorer)
 					" append sequence for opening file
 					"exe "cd ".fnamemodify(path,":h")
 					exe "e ".path
-					if s:close_explorer==2
+					if s:close_explorer==2 "eh view
 						setl noma
+						setl ro
 					else
 						setl ma
+						setl noro
 					end
 				en
 				if s:close_explorer==1
