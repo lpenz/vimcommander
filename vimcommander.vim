@@ -1,4 +1,4 @@
-"$Id: vimcommander.vim,v 1.52 2003/11/19 22:07:05 lpenz Exp $
+"$Id: vimcommander.vim,v 1.53 2003/11/19 22:15:36 lpenz Exp $
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Name:         vimcommander
 " Description:  total-commander-like file manager for vim.
@@ -80,10 +80,10 @@ fu! <SID>CommanderMappings()
 	noremap <silent> <buffer> <kPlus>          :cal <SID>SelectPatternAsk()<CR>
 	noremap <silent> <buffer> <kMinus>         :cal <SID>DeSelectPatternAsk()<CR>
 	"Dir history
-	noremap <silent> <buffer> <C-y>            :cal <SID>PrevDir()<CR>
-	noremap <silent> <buffer> <leader>y        :cal <SID>PrevDir()<CR>
-	noremap <silent> <buffer> <C-u>            :cal <SID>NextDir()<CR>
-	noremap <silent> <buffer> <leader>u        :cal <SID>NextDir()<CR>
+	noremap <silent> <buffer> <C-t>            :cal <SID>PrevDir()<CR>
+	noremap <silent> <buffer> <leader>t        :cal <SID>PrevDir()<CR>
+	noremap <silent> <buffer> <C-y>            :cal <SID>NextDir()<CR>
+	noremap <silent> <buffer> <leader>y        :cal <SID>NextDir()<CR>
 
 	"Misc (some are Opsplorer's)
 	noremap <silent> <buffer> <C-F11>          :cal <SID>SetMatchPattern()<CR>
@@ -1191,7 +1191,7 @@ if exists("b:vimcommander_install_doc") && b:vimcommander_install_doc==0
 end
 
 let s:revision=
-			\ substitute("$Revision: 1.52 $",'\$\S*: \([.0-9]\+\) \$','\1','')
+			\ substitute("$Revision: 1.53 $",'\$\S*: \([.0-9]\+\) \$','\1','')
 silent! let s:install_status =
 			\ <SID>SpellInstallDocumentation(expand('<sfile>:p'), s:revision)
 if (s:install_status == 1)
