@@ -1,4 +1,4 @@
-"$Id: vimcommander.vim,v 1.49 2003/11/17 02:39:31 lpenz Exp $
+"$Id: vimcommander.vim,v 1.50 2003/11/18 00:14:57 lpenz Exp $
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Name:         vimcommander
 " Description:  total-commander-like file manager for vim.
@@ -117,7 +117,7 @@ fu! <SID>VimCommanderShow()
 		return
 	end
 	"close all windows
-	let s:buffer_to_load=bufname("")
+	let s:buffer_to_load=expand("%:p")
 	"let v:errmsg=''
 	"while v:errmsg==''
 	"	silent! close
@@ -1183,7 +1183,7 @@ fu! <SID>SpellInstallDocumentation(full_name, revision)
 endf
 
 let s:revision=
-			\ substitute("$Revision: 1.49 $",'\$\S*: \([.0-9]\+\) \$','\1','')
+			\ substitute("$Revision: 1.50 $",'\$\S*: \([.0-9]\+\) \$','\1','')
 silent! let s:install_status =
 			\ <SID>SpellInstallDocumentation(expand('<sfile>:p'), s:revision)
 if (s:install_status == 1)
