@@ -4,7 +4,7 @@
 " Author:  Leandro Penz
 " Date:    2003/11/01
 " Email:   lpenz AT terra DOT com DOT br
-" Version: $Id: vimcommander.vim,v 1.37 2003/11/12 23:30:49 lpenz Exp $
+" Version: $Id: vimcommander.vim,v 1.38 2003/11/12 23:48:13 lpenz Exp $
 "
 " Shameless using opsplorer.vim by Patrick Schiel.
 "
@@ -919,23 +919,10 @@ fu! <SID>OnDoubleClick(close_explorer)
 		el
 			" try to resolve filename
 			" and open in other window
-			let path=<SID>GetPathName(xpos,ypos)
 			if filereadable(path)
-				" go to last accessed buffer
-				winc j
+				cal <SID>FileEdit()
 				" append sequence for opening file
 				"exe "cd ".fnamemodify(path,":h")
-				exe "e ".path
-				if s:close_explorer==2 "eh view
-					setl noma
-					setl ro
-				else
-					setl ma
-					setl noro
-				end
-			en
-			if s:close_explorer==1
-				cal VimCommanderToggle()
 			en
 		en
 	el
