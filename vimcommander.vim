@@ -1,4 +1,4 @@
-"$Id: vimcommander.vim,v 1.43 2003/11/16 20:01:11 lpenz Exp $
+"$Id: vimcommander.vim,v 1.44 2003/11/16 20:04:04 lpenz Exp $
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Name:         vimcommander
 " Description:  total-commander-like file manager for vim.
@@ -1007,7 +1007,7 @@ fu! <SID>TreeExpand(xpos,ypos,path)
 			let entry=substitute(entry,".*/",'','')
 			if entry!="." && entry!=".."
 				" indent, mark as node and append
-				let entry=<SID>SpaceString(a:xpos+1)."+".entry
+				let entry=" "."+".entry
 				cal append(row,entry)
 				let row=row+1
 			en
@@ -1029,7 +1029,7 @@ fu! <SID>TreeExpand(xpos,ypos,path)
 			if !isdirectory(entry)&&filereadable(entry)
 				let entry=substitute(entry,".*/",'','')
 				" indent and append
-				let entry=<SID>SpaceString(a:xpos+2).entry
+				let entry="  ".entry
 				cal append(row,entry)
 				let row=row+1
 			en
@@ -1092,16 +1092,6 @@ fu! <SID>CutFirstLine(text)
 	retu strpart(a:text,pos+1,strlen(a:text))
 endf
 
-fu! <SID>SpaceString(width)
-	let spacer=""
-	let width=a:width
-	wh width>0
-		let spacer=spacer." "
-		let width=width-1
-	endw
-	retu spacer
-endf
- 
 fu! <SID>SpellInstallDocumentation(full_name, revision)
 	" Name of the document path based on the system we use:
 	if (has("unix"))
@@ -1209,7 +1199,7 @@ fu! <SID>SpellInstallDocumentation(full_name, revision)
 endf
 
 let s:revision=
-			\ substitute("$Revision: 1.43 $",'\$\S*: \([.0-9]\+\) \$','\1','')
+			\ substitute("$Revision: 1.44 $",'\$\S*: \([.0-9]\+\) \$','\1','')
 silent! let s:install_status =
 			\ <SID>SpellInstallDocumentation(expand('<sfile>:p'), s:revision)
 if (s:install_status == 1)
