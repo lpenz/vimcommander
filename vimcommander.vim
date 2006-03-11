@@ -1,3 +1,4 @@
+"$Id: vimcommander.vim,v 1.2 2005/10/31 15:57:40 penz Exp $
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Name:         vimcommander
 " Description:  total-commander-like file manager for vim.
@@ -12,11 +13,10 @@
 "                   in which this script is based,
 "               Christian Ghisler, the author of Total Commander, for the best
 "                   *-commander around. (http://www.ghisler.com)
-"               Mathieu Clabaut, the author of vimspell, from where I got how
-"                   to autogenerate the help from within the script.
+"               Mathieu Clabaut <mathieu.clabaut@free.fr>, the author of
+"                    vimspell, from where I got how to autogenerate the 
+"                    help from within the script.
 "               Diego Morales, fixes and suggestions.
-"               Yves Rutschle, fixes and suggestions.
-"               Helmut Stiegler, fixes.
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Section: Documentation 
 "
@@ -54,8 +54,10 @@ fu! <SID>CommanderMappings()
 	noremap <silent> <buffer> <S-F4>           :cal <SID>NewFileEdit()<CR>
 	noremap <silent> <buffer> <leader><F4>     :cal <SID>NewFileEdit()<CR>
 	noremap <silent> <buffer> <leader>n        :cal <SID>NewFileEdit()<CR>
-	noremap <silent> <buffer> <F5>             :cal <SID>FileCopy()<CR>
-	noremap <silent> <buffer> <F6>             :cal <SID>FileMove()<CR>
+	noremap <silent> <buffer> <F5>             :cal <SID>FileCopy(0)<CR>
+	noremap <silent> <buffer> <S-F5>           :cal <SID>FileCopy(1)<CR>
+	noremap <silent> <buffer> <F6>             :cal <SID>FileMove(0)<CR>
+	noremap <silent> <buffer> <S-F6>           :cal <SID>FileMove(1)<CR>
 	noremap <silent> <buffer> <F7>             :cal <SID>DirCreate()<CR>
 	noremap <silent> <buffer> <F8>             :cal <SID>FileDelete()<CR>
 	noremap <silent> <buffer> <DEL>            :cal <SID>FileDelete()<CR>
@@ -216,6 +218,15 @@ fu! <SID>Close()
 	let s:line_right=line('.')
 	silent! close
 	let g:vimcommander_loaded=0
+	"if strlen(s:buffer_to_load)>0
+	"	exe "edit +buffer ".s:buffer_to_load
+	"else
+	"	if bufwinnr(s:bufnr_right)!=-1
+	"		"exe "new +buffer ".s:buffer_to_load
+	"		"exe 'wincmd w'
+	"		close
+	"	end
+	"end
 	cal <SID>LoadOpts()
 endf
 
@@ -426,9 +437,6 @@ endf
 fu! <SID>DirCreate()
 	let newdir=""
 	let newdir=input("New directory name: ","")
-	if newdir==""
-		return
-	end
 	if filereadable(newdir)
 		echo "File with that name exists."
 		return
@@ -437,7 +445,7 @@ fu! <SID>DirCreate()
 		echo "Directory already exists."
 		return 
 	end
-	let i=system("mkdir \"".<SID>MyPath().newdir."\"")
+	let i=system("mkdir ".<SID>MyPath().newdir)
 	cal <SID>RefreshDisplays()
 	norm! gg1j
 	cal search("^+".newdir."$")
@@ -484,32 +492,36 @@ fu! <SID>PathUnderCursor()
 	let ypos=line('.')
 	if ypos>1 "not on line 1
 		let rv=<SID>GetPathName(xpos,ypos)
-		return rv
+		return escape(rv, " ")
 	end
 	return ""
 endf
 
-fu! <SID>FileCopy()
+fu! <SID>FileCopy(samedir)
 	let i=0
 	if strlen(b:vimcommander_selected)>0
 		let name=<SID>SelectedNum(b:vimcommander_selected, i)
 		let filename=<SID>MyPath().name
-		let otherfilename=<SID>OtherPath().name
+		if a:samedir == 0
+			let otherfilename=<SID>OtherPath().name
+		else
+			let otherfilename=<SID>MyPath().name
+		end
 		let i=i+1
 	else
 		let name=" "
 		let filename=<SID>PathUnderCursor()
-		let otherfilename=<SID>OtherPath().<SID>FilenameUnderCursor()
+		if a:samedir == 0
+			let otherfilename=<SID>OtherPath().<SID>FilenameUnderCursor()
+		else
+			let otherfilename=<SID>MyPath().<SID>FilenameUnderCursor()
+		end
 	end
 	let opt="y"
 	while strlen(name)>0
 		if filereadable(filename) || isdirectory(filename)
 			if strlen(b:vimcommander_selected)==0
 				let newfilename=input("Copy ".filename." to: ",otherfilename)
-				if newfilename==""
-					cal <SID>RefreshDisplays()
-					return
-				end
 			else
 				let newfilename=otherfilename
 			end
@@ -553,27 +565,31 @@ fu! <SID>FileCopy()
 	cal <SID>RefreshDisplays()
 endf
 
-fu! <SID>FileMove()
+fu! <SID>FileMove(rename)
 	let i=0
 	if strlen(b:vimcommander_selected)>0
 		let name=<SID>SelectedNum(b:vimcommander_selected, i)
 		let filename=<SID>MyPath().name
-		let otherfilename=<SID>OtherPath().name
+		if a:rename == 1
+			let otherfilename=<SID>MyPath().name
+		else
+			let otherfilename=<SID>OtherPath().name
+		end
 		let i=i+1
 	else
 		let name=" "
 		let filename=<SID>PathUnderCursor()
-		let otherfilename=<SID>OtherPath().<SID>FilenameUnderCursor()
+		if a:rename == 1
+			let otherfilename=<SID>MyPath().<SID>FilenameUnderCursor()
+		else
+			let otherfilename=<SID>OtherPath().<SID>FilenameUnderCursor()
+		end
 	end
 	let opt='y'
 	while strlen(name)>0
 		if filereadable(filename) || isdirectory(filename)
 			if strlen(b:vimcommander_selected)==0
 				let newfilename=input("Move ".filename." to: ",otherfilename)
-				if newfilename==""
-					cal <SID>RefreshDisplays()
-					return
-				end
 			else
 				let newfilename=otherfilename
 			end
@@ -841,18 +857,12 @@ endf
 
 fu! <SID>SelectPatternAsk()
 	let pattern=input("Select with pattern: ")
-	if pattern == ""
-		return
-	endif
 	cal <SID>SelectPattern(pattern)
 	echo ""
 endf
 
 fu! <SID>DeSelectPatternAsk()
 	let pattern=input("Deselect with pattern: ")
-	if pattern == ""
-		return
-	endif
 	cal <SID>DeSelectPattern(pattern)
 	echo ""
 endf
@@ -1218,7 +1228,7 @@ if exists("b:vimcommander_install_doc") && b:vimcommander_install_doc==0
 end
 
 let s:revision=
-			\ substitute("$Revision: 1.54.2.9 $",'\$\S*: \([.0-9]\+\) \$','\1','')
+			\ substitute("$Revision: 1.2 $",'\$\S*: \([.0-9]\+\) \$','\1','')
 silent! let s:install_status =
 			\ <SID>SpellInstallDocumentation(expand('<sfile>:p'), s:revision)
 if (s:install_status == 1)
@@ -1341,8 +1351,6 @@ CONTENT                                                *vimcommander-contents*
     - Options for some of the behaviors.
     - Directory bookmarks.
     - Make selection by pattern faster.
-	- Rename-in-place.
-	- copy-paste mechanism.
 
 ==============================================================================
 6. VimCommander Links                                     *vimcommander-links*
