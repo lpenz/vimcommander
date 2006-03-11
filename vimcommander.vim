@@ -1365,5 +1365,5 @@ CONTENT                                                *vimcommander-contents*
 
 === END_DOC
 
-" vim: fdm=marker foldmarker=fu!,endf
+" vim: ft=vim fdm=marker foldmarker=fu!,endf
 
