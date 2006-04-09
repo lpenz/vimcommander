@@ -85,6 +85,8 @@ fu! <SID>CommanderMappings()
 	noremap <silent> <buffer> <leader><kMinus> :cal <SID>DeSelectPattern('*')<CR>
 	noremap <silent> <buffer> <kPlus>          :cal <SID>SelectPatternAsk()<CR>
 	noremap <silent> <buffer> <kMinus>         :cal <SID>DeSelectPatternAsk()<CR>
+	noremap <silent> <buffer> +                :cal <SID>SelectPatternAsk()<CR>
+	noremap <silent> <buffer> -                :cal <SID>DeSelectPatternAsk()<CR>
 	"Dir history
 	noremap <silent> <buffer> <C-t>            :cal <SID>PrevDir()<CR>
 	noremap <silent> <buffer> <leader>t        :cal <SID>PrevDir()<CR>
