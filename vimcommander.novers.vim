@@ -1229,13 +1229,10 @@ if exists("b:vimcommander_install_doc") && b:vimcommander_install_doc==0
 	finish
 end
 
-let s:revision=
-			\ substitute("$Revision: 1.2 $",'\$\S*: \([.0-9]\+\) \$','\1','')
-silent! let s:install_status =
-			\ <SID>SpellInstallDocumentation(expand('<sfile>:p'), s:revision)
+let s:revision= substitute("$Revision: 1.2 $",'\$\S*: \([.0-9]\+\) \$','\1','')
+silent! let s:install_status = <SID>SpellInstallDocumentation(expand('<sfile>:p'), s:revision)
 if (s:install_status == 1)
-	echom expand("<sfile>:t:r") . ' v' . s:revision .
-				\ ': Help-documentation installed.'
+	echom expand("<sfile>:t:r") . ' v' . s:revision . ': Help-documentation installed.'
 endif
 
 finish
