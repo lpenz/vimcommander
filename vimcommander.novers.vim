@@ -1,4 +1,4 @@
-"$Id: vimcommander.vim,v 1.2 2005/10/31 15:57:40 penz Exp $
+"$Id: vimcommander.vim version 69 $
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Name:         vimcommander
 " Description:  total-commander-like file manager for vim.
@@ -233,7 +233,6 @@ fu! <SID>Close()
 endf
 
 fu! <SID>SaveOpts()
-	let s:scrollbind=&scrollbind
 	let s:wrap=&wrap
 	let s:nu=&nu
 	let s:buflisted=&buflisted
@@ -242,11 +241,6 @@ fu! <SID>SaveOpts()
 endf
 
 fu! <SID>LoadOpts()
-	if s:scrollbind==1
-		set scrollbind
-	else
-		set noscrollbind
-	end
 	if s:wrap==1
 		set wrap
 	else
@@ -1229,7 +1223,7 @@ if exists("b:vimcommander_install_doc") && b:vimcommander_install_doc==0
 	finish
 end
 
-let s:revision= substitute("$Revision: 1.2 $",'\$\S*: \([.0-9]\+\) \$','\1','')
+let s:revision= substitute("$Revision: 69 $",'\$\S*: \([.0-9]\+\) \$','\1','')
 silent! let s:install_status = <SID>SpellInstallDocumentation(expand('<sfile>:p'), s:revision)
 if (s:install_status == 1)
 	echom expand("<sfile>:t:r") . ' v' . s:revision . ': Help-documentation installed.'
