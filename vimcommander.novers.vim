@@ -233,6 +233,7 @@ fu! <SID>Close()
 endf
 
 fu! <SID>SaveOpts()
+	let s:scrollbind=&scrollbind
 	let s:wrap=&wrap
 	let s:nu=&nu
 	let s:buflisted=&buflisted
@@ -241,6 +242,11 @@ fu! <SID>SaveOpts()
 endf
 
 fu! <SID>LoadOpts()
+	if s:scrollbind==1
+		set scrollbind
+	else
+		set noscrollbind
+	end
 	if s:wrap==1
 		set wrap
 	else
