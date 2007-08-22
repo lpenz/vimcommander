@@ -144,6 +144,8 @@ fu! <SID>VimCommanderShow()
 	autocmd! BufWinLeave VimCommanderRight
 	" create new window
 	let winsize=&lines
+	let s:split_tmp = &l:splitright
+	setlocal nosplitright
 	exe winsize." split VimCommanderRight"
 	resize +999
 	let s:bufnr_right=winbufnr(0)
@@ -155,6 +157,7 @@ fu! <SID>VimCommanderShow()
 	cal <SID>GotoEntry(s:line_right)
 	exe "vs VimCommanderLeft"
 	let s:bufnr_left=winbufnr(0)
+	let &l:splitright = s:split_tmp
 	cal <SID>InitCommanderOptions()
 	cal <SID>CommanderMappings()
 	cal <SID>InitCommanderColors()
