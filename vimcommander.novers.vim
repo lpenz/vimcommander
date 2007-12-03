@@ -19,6 +19,8 @@
 "               Diego Morales, fixes and suggestions.
 "               Vladimír Marek <vlmarek at volny dot cz>, fix for files with
 "                    with spaces and refactoring.
+"               Oleg Popov <dev-random at mail dot ru>, fix for browsing
+"                    hidden files.
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Section: Documentation 
 "
@@ -1081,7 +1083,7 @@ fu! <SID>TreeExpand(xpos,ypos,path)
 	let dirlist=""
 	" extra globbing for hidden files
 	if s:show_hidden_files
-		let dirlist=glob(path.'/.*'.s:file_match_pattern)."\n"
+		let dirlist=glob(path.'/.'.s:file_match_pattern)."\n"
 	en
 	let dirlist=dirlist.globpath(path, s:file_match_pattern)."\n"
 	wh strlen(dirlist)>0
