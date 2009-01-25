@@ -381,15 +381,15 @@ endf
 fu! <SID>MyPath()
 	if exists("s:bufnr_left")
 		if winbufnr(0) == s:bufnr_left
-			return "\"".s:path_left."/"."\""
+			return s:path_left."/"
 		else
-			return "\"".s:path_right."/"
+			return s:path_right."/"
 		en
 	else
 		if winbufnr(0) == s:bufnr_right
-			return "\"".s:path_left."/"."\""
+			return s:path_left."/"
 		else
-			return "\"".s:path_right."/"."\""
+			return s:path_right."/"
 		en
 	end
 endf
