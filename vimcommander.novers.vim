@@ -347,7 +347,6 @@ fu! <SID>FileView()
 	let opt=""
 	while strlen(name)>0
 		if filereadable(filename)
-			cal input(filename)
 			cal system("(see ".shellescape(filename).") &")
 		en
 		if strlen(b:vimcommander_selected)>0
