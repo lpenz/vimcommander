@@ -335,16 +335,31 @@ fu! <SID>ProvideBuffer()
 endf
 
 fu! <SID>FileView()
-	let path=<SID>PathUnderCursor()
-	if(isdirectory(path))
-		return
+	let i=0
+	if strlen(b:vimcommander_selected)>0
+		let name=<SID>SelectedNum(b:vimcommander_selected, i)
+		let filename=<SID>MyPath().name
+		let i=i+1
+	else
+		let name=" "
+		let filename=<SID>PathUnderCursor()
 	end
-	"cal <SID>ProvideBuffer()
-	"exe "edit ".path
-	let s:buffer_to_load=path
-	cal <SID>Close()
-	setl noma
-	setl ro
+	let opt=""
+	while strlen(name)>0
+		if filereadable(filename)
+			cal input(filename)
+			cal system("(see ".shellescape(filename).") &")
+		en
+		if strlen(b:vimcommander_selected)>0
+			let name=<SID>SelectedNum(b:vimcommander_selected, i)
+			let filename=<SID>MyPath().name
+			let i=i+1
+		else
+			let name=""
+		end
+	endwhile
+	let b:vimcommander_selected=""
+	cal <SID>RefreshDisplays()
 endf
 
 fu! <SID>FileEdit()
