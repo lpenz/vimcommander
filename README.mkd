@@ -4,7 +4,7 @@ vimcommander
 
 This is an adaptation of opsplorer
 ([vimscript #362](http://www.vim.org/scripts/script.php?script_id=808)),
-intended to be more like the [Total Comander](http://www.ghisler.com) file
+intended to be more like the [Total Commander](http://www.ghisler.com) file
 explorer.
 
 This opens two panels of file explorers on the top half of the vim screen.  
@@ -20,7 +20,8 @@ Vimcommander keys are mostly totalcommander's:
 - F7 - create dir
 - F8 - del
 - Others: C-U, C-Left/C-Right, C-R, BS, DEL, C-H, etc.
-- Selection of files/dirs also works: INS, +, -. Then copy/move/del selected files.
+- Selection of files/dirs also works: INS, +, -.
+    Then copy/move/del selected files.
 
 Suggested binding is  
 `noremap <silent> <F11> :cal VimCommanderToggle()<CR>`
