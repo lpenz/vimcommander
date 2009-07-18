@@ -7,7 +7,22 @@ This is an adaptation of opsplorer
 intended to be more like the [Total Commander](http://www.ghisler.com) file
 explorer.
 
-This opens two panels of file explorers on the top half of the vim screen.  
+
+
+Installation
+------------
+
+- Drop *vimcommander.vim* in *~/.vim/plugin*
+- Put in you *.vimrc* a map to *VimCommanderToggle()* like this:  
+    `noremap <silent> <F11> :cal VimCommanderToggle()<CR>`
+
+
+
+
+Usage
+-----
+
+vimcommander opens two panels of file explorers on the top half of the vim screen.  
 Targets for moving and copying defaults to the other panel, like totalcmd.  
 TAB switches between panels.
 
@@ -28,12 +43,4 @@ Suggested binding is
 
 Tested on Linux. I have reports that it doesn't work on Windows.
 
-
-
-Installation
-------------
-
-- Drop *vimcommander.vim* in *~/.vim/plugin*
-- Put in you *.vimrc* a map to *VimCommanderToggle()* like this:  
-    `noremap <silent> <F11> :cal VimCommanderToggle()<CR>`
 
