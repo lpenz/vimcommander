@@ -22,6 +22,9 @@
 "               Oleg Popov <dev-random at mail dot ru>, fix for browsing
 "                    hidden files.
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" PROGRAM_NAME = "vimcommander"
+" PROGRAM_VERSION = "0.76"
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Section: Documentation 
 "
 " Documentation should be available by ":help vimcommander" command, once the
