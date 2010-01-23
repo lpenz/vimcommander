@@ -21,6 +21,7 @@
 "                    with spaces and refactoring.
 "               Oleg Popov <dev-random at mail dot ru>, fix for browsing
 "                    hidden files.
+"               Lajos Zaccomer <lajos@zaccomer.org>, custom starting paths.
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 let PROGRAM_NAME = "vimcommander"
 let PROGRAM_VERSION = "0.76"
@@ -123,8 +124,14 @@ endf
 fu!<SID>First()
 	cal <SID>SaveOpts()
 	cal <SID>InitOptions()
-	let s:path_left=getcwd()
-	let s:path_right=getcwd()
+	let s:path_left = getcwd()
+	if exists("g:vimcommander_first_path_left")
+		let s:path_left = g:vimcommander_first_path_left
+	end
+	let s:path_right = getcwd()
+	if exists("g:vimcommander_first_path_right")
+		let s:path_right = g:vimcommander_first_path_right
+	end
 	let s:line_right=2
 	let s:line_left=2
 	let g:vimcommander_lastside="VimCommanderLeft"
