@@ -24,7 +24,7 @@
 "               Lajos Zaccomer <lajos@zaccomer.org>, custom starting paths.
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 let PROGRAM_NAME = "vimcommander"
-let PROGRAM_VERSION = "0.76"
+let PROGRAM_VERSION = "0.77"
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Section: Documentation 
 "
