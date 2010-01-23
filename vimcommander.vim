@@ -22,8 +22,8 @@
 "               Oleg Popov <dev-random at mail dot ru>, fix for browsing
 "                    hidden files.
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" PROGRAM_NAME = "vimcommander"
-" PROGRAM_VERSION = "0.76"
+let PROGRAM_NAME = "vimcommander"
+let PROGRAM_VERSION = "0.76"
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Section: Documentation 
 "
@@ -1241,8 +1241,7 @@ if exists("b:vimcommander_install_doc") && b:vimcommander_install_doc==0
 	finish
 end
 
-let s:revision=
-			\ substitute("$Revision: 69 $",'\$\S*: \([.0-9]\+\) \$','\1','')
+let s:revision= PROGRAM_VERSION
 silent! let s:install_status =
 			\ <SID>SpellInstallDocumentation(expand('<sfile>:p'), s:revision)
 if (s:install_status == 1)
