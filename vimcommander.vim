@@ -1,4 +1,3 @@
-"$Id: vimcommander.vim version 69 $
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Name:         vimcommander
 " Description:  total-commander-like file manager for vim.
