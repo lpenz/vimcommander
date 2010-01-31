@@ -5,7 +5,7 @@ SOURCE += plugin/vimcommander.vim
 PROGRAM_VERSION = "0.78"
 
 
-all:
+all: $(SOURCE)
 
 
 doc/vimcommander.txt: vimcommander.txt
@@ -21,8 +21,7 @@ ${PLUGIN}.vba: ${SOURCE}
 
 
 clean:
-	rm -f ${PLUGIN}.vba
-	rm -f doc/vimcommander.txt plugin/vimcommander.vim
+	rm -f ${PLUGIN}.vba $(SOURCE)
 	-rmdir doc plugin
 
 
