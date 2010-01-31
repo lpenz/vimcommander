@@ -2,6 +2,7 @@
 PLUGIN = vimcommander
 SOURCE += doc/vimcommander.txt
 SOURCE += plugin/vimcommander.vim
+PROGRAM_NAME = "vimcommander"
 PROGRAM_VERSION = "0.78"
 
 
