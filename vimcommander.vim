@@ -20,7 +20,8 @@
 "                    with spaces and refactoring.
 "               Oleg Popov <dev-random at mail dot ru>, fix for browsing
 "                    hidden files.
-"               Lajos Zaccomer <lajos@zaccomer.org>, custom starting paths.
+"               Lajos Zaccomer <lajos@zaccomer.org>, custom starting paths,
+"                    change dir dialog.
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 let PROGRAM_NAME = "vimcommander"
 let PROGRAM_VERSION = "0.77"
@@ -105,6 +106,9 @@ fu! <SID>CommanderMappings()
 	noremap <silent> <buffer> <leader><F11>    :cal <SID>SetMatchPattern()<CR>
 	"noremap <silent> <buffer> <C-O>            :cal VimCommanderToggle()<CR>
 	"noremap <silent> <buffer> <leader>o        :cal VimCommanderToggle()<CR>
+
+	"ChangeDir dialog, required in windows:
+	noremap <silent> <buffer> <leader>c        :cal <SID>ChangeDir()<CR>
 
 endf
 
@@ -1072,6 +1076,12 @@ fu! <SID>OnDoubleClick()
 		" rebuild tree with new path
 		cal <SID>BuildTree(strpart(getline(1),0,col('.')))
 	en
+endf
+
+fu! <SID>ChangeDir()
+	let l:path = input("Change to new directory: ", "", "file")
+	let l:path = substitute(l:path,'\\','/','g')
+	cal <SID>BuildTree(l:path)
 endf
 
 fu! <SID>TreeExpand(xpos,ypos,path)
