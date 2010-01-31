@@ -1,0 +1,40 @@
+Copyright (C) 2009 Leandro Lisboa Penz
+Leandro Lisboa Penz <llpenz@gmail.com>
+http://github.com/lpenz/vimcommander
+
+License:
+
+    This package is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License version 2 as
+    published by the Free Software Foundation.
+
+    This package is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this package; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
+
+
+Credits:
+Patrick Schiel, the author of Opsplorer.vim
+    (http://www.vim.org/scripts/script.php?script_id=362)
+    in which this script is based.
+Diego Morales, fixes and suggestions.
+Vladimír Marek <vlmarek at volny dot cz>, fix for files with
+     with spaces and refactoring.
+Oleg Popov <dev-random at mail dot ru>, fix for browsing
+     hidden files.
+Lajos Zaccomer <lajos@zaccomer.org>, custom starting paths,
+     change dir dialog.
+
+
+Thanks go to:
+Christian Ghisler, the author of Total Commander, for the best
+    *-commander around. (http://www.ghisler.com).
+Mathieu Clabaut <mathieu.clabaut at free dot fr>, the author
+     of vimspell, from where I got how to autogenerate the
+     help from within the script up to version 0.78.
+
