@@ -1,7 +1,7 @@
 *vimcommander.txt*   total-commander-like file-manager for vim.      #version#
 
 
-                        VIMCOMMANDER REFERENCE MANUAL~
+                        VIMCOMMANDER $PROGRAM_VERSION REFERENCE MANUAL~
 
 
 Total-commander-like two-panel file explorer for vim.

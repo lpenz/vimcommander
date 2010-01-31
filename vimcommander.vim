@@ -24,7 +24,7 @@
 "                    change dir dialog.
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 let PROGRAM_NAME = "vimcommander"
-let PROGRAM_VERSION = "0.78"
+let PROGRAM_VERSION = "$PROGRAM_VERSION"
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Section: Documentation 
 "
