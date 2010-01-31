@@ -1,7 +1,7 @@
 *vimcommander.txt*   total-commander-like file-manager for vim.      #version#
 
 
-                        VIMCOMMANDER $PROGRAM_VERSION REFERENCE MANUAL~
+                        VIMCOMMANDER REFERENCE MANUAL~
 
 
 Total-commander-like two-panel file explorer for vim.
@@ -9,6 +9,8 @@ Total-commander-like two-panel file explorer for vim.
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License.  See
     http://www.gnu.org/copyleft/gpl.txt
+
+This manual corresponds to vimcommander version $VERSION.
 
 ==============================================================================
 CONTENT                                                *vimcommander-contents* 

@@ -2,18 +2,18 @@
 PLUGIN = vimcommander
 SOURCE += doc/vimcommander.txt
 SOURCE += plugin/vimcommander.vim
-PROGRAM_VERSION = 0.78
+PROGRAM_VERSION = "0.78"
 
 
 all:
 
 
 doc/vimcommander.txt: vimcommander.txt
-	mkdir -p $(dir $@); sed 's/\$$PROGRAM_VERSION/$(PROGRAM_VERSION)/g' $^ > $@
+	mkdir -p $(dir $@); sed 's/\$$VERSION/$(PROGRAM_VERSION)/g' $^ > $@
 
 
 plugin/vimcommander.vim: vimcommander.vim
-	mkdir -p $(dir $@); sed 's/\$$PROGRAM_VERSION/$(PROGRAM_VERSION)/g' $^ > $@
+	mkdir -p $(dir $@); sed 's/\$$VERSION/$(PROGRAM_VERSION)/g' $^ > $@
 
 
 ${PLUGIN}.vba: ${SOURCE}

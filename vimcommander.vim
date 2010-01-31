@@ -1,5 +1,6 @@
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Name:         vimcommander
+" Version:      $VERSION
 " Description:  total-commander-like file manager for vim.
 " Author:       Leandro Penz <lpenz AT terra DOT com DOT br>
 " Maintainer:   Leandro Penz <lpenz AT terra DOT com DOT br>
@@ -23,8 +24,6 @@
 "               Lajos Zaccomer <lajos@zaccomer.org>, custom starting paths,
 "                    change dir dialog.
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-let PROGRAM_NAME = "vimcommander"
-let PROGRAM_VERSION = "$PROGRAM_VERSION"
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Section: Documentation 
 "
