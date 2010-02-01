@@ -1,9 +1,10 @@
 
-PLUGIN = vimcommander
 SOURCE += doc/vimcommander.txt
 SOURCE += plugin/vimcommander.vim
 PROGRAM_NAME = "vimcommander"
 PROGRAM_VERSION = "0.78"
+NAME = $(patsubst "%",%,$(PROGRAM_NAME))
+VERS = $(patsubst "%",%,$(PROGRAM_VERSION))
 
 
 all: $(SOURCE)
@@ -17,12 +18,15 @@ plugin/vimcommander.vim: vimcommander.vim
 	mkdir -p $(dir $@); sed 's/\$$VERSION/$(PROGRAM_VERSION)/g' $^ > $@
 
 
-${PLUGIN}.vba: ${SOURCE}
-	vim -X --cmd 'let g:plugin_name="${PLUGIN}"' -s build.vim > /dev/null
+vba: $(NAME)_$(VERS).vba
+
+
+$(NAME)_$(VERS).vba: $(SOURCE)
+	vim -X --cmd 'let g:plugin_name="$@"' -s build.vim > /dev/null
 
 
 clean:
-	rm -f ${PLUGIN}.vba $(SOURCE)
+	rm -f $(NAME)_$(VERS).vba $(SOURCE)
 	-rmdir doc plugin
 
 
