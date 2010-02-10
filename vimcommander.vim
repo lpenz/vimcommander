@@ -434,8 +434,8 @@ fu! <SID>BuildTreeNoPrev(path)
 	norm! ggVG"_xo
 	" check if no unneeded trailing / is there
   let l:path_len = strlen(path)
-	if path_len > 1 && path[path_len - 1] == s:slash_char
-		let path = strpart(path, 0, path_len - 1)
+	if l:path_len > 1 && path[l:path_len - 1] == s:slash_char
+		let path = strpart(path, 0, l:path_len - 1)
 	en
 	if(winbufnr(0)==s:bufnr_right)
 		let s:path_right=path
