@@ -108,7 +108,7 @@ fu! <SID>CommanderMappings()
 
 	"ChangeDir dialog, required in windows:
 	noremap <silent> <buffer> <leader>c        :cal <SID>ChangeDir()<CR>
-
+	noremap <silent> <buffer> cd               :cal <SID>ChangeDir()<CR>
 endf
 
 fu! VimCommanderToggle()
@@ -124,6 +124,11 @@ fu! VimCommanderToggle()
 endf
 
 fu!<SID>First()
+  if has("unix")
+    let s:slash_char = "/"
+  else
+    let s:slash_char = "\\"
+  endif
 	cal <SID>SaveOpts()
 	cal <SID>InitOptions()
 	let s:path_left = getcwd()
@@ -428,8 +433,9 @@ fu! <SID>BuildTreeNoPrev(path)
 	setl ma
 	norm! ggVG"_xo
 	" check if no unneeded trailing / is there
-	if strlen(path)>1&&path[strlen(path)-1]=="/"
-		let path=strpart(path,0,strlen(path)-1)
+  let l:path_len = strlen(path)
+	if path_len > 1 && path[path_len - 1] == s:slash_char
+		let path = strpart(path, 0, path_len - 1)
 	en
 	if(winbufnr(0)==s:bufnr_right)
 		let s:path_right=path
@@ -519,6 +525,7 @@ fu! <SID>GetPathName(xpos,ypos)
 	if getline(1)!='/'
 		let path=getline(1).path
 	en
+	let l:path = substitute(l:path,'\\','/','g')
 	retu path
 endf
 
@@ -1062,9 +1069,13 @@ fu! <SID>OnDoubleClick()
 	el
 		" we're on line 1 here! getting new base path now...
 		" advance to next slash
-		if getline(1)[xpos]!="/"
-			norm! f/
-			" no next slash -> current directory, just rebuild
+		if getline(1)[xpos]!=s:slash_char
+      if has("unix")
+			  norm! f/
+      else
+        norm! f\
+      endif
+		  " no next slash -> current directory, just rebuild
 			if col('.')-1==xpos
 				cal <SID>BuildTree(getline(1))
 				retu
@@ -1078,8 +1089,14 @@ fu! <SID>OnDoubleClick()
 endf
 
 fu! <SID>ChangeDir()
-	let l:path = input("Change to new directory: ", "", "file")
-	let l:path = substitute(l:path,'\\','/','g')
+	let l:oldpath = <SID>MyPath()
+	let l:path = input("Change directory: ", "", "file")
+  if l:path == ""
+    let l:path = l:oldpath
+  endif
+  if !has("unix")
+	  let l:path = substitute(l:path,'\\','/','g')
+  endif
 	cal <SID>BuildTree(l:path)
 endf
 
@@ -1102,7 +1119,7 @@ fu! <SID>TreeExpand(xpos,ypos,path)
 		let dirlist=<SID>CutFirstLine(dirlist)
 		" add to tree if directory
 		if isdirectory(entry)
-			let entry=substitute(entry,".*/",'','')
+			let entry=substitute(entry,".*".s:slash_char,'','')
 			if entry!="." && entry!=".."
 				" indent, mark as node and append
 				let entry="  "."+".entry
@@ -1125,7 +1142,7 @@ fu! <SID>TreeExpand(xpos,ypos,path)
 		" only files
 		if entry!="." && entry!=".." && entry!=""
 			if !isdirectory(entry)&&filereadable(entry)
-				let entry=substitute(entry,".*/",'','')
+				let entry=substitute(entry,".*".s:slash_char,'','')
 				" indent and append
 				let entry="   ".entry
 				cal append(row,entry)
