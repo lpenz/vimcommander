@@ -489,7 +489,7 @@ fu! <SID>DirCreate()
 	let i=system("mkdir ".shellescape(<SID>MyPath().newdir))
 	cal <SID>RefreshDisplays()
 	norm! gg1j
-	cal search("^+".newdir."$")
+	cal search("^  +".newdir."$")
 	norm! 4|
 endf
 
