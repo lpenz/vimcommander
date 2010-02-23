@@ -28,7 +28,7 @@ Vladimír Marek <vlmarek at volny dot cz>, fix for files with
 Oleg Popov <dev-random at mail dot ru>, fix for browsing
      hidden files.
 Lajos Zaccomer <lajos@zaccomer.org>, custom starting paths,
-     change dir dialog.
+     change dir dialog and Windows path handling fixes.
 
 
 Thanks go to:
