@@ -75,26 +75,27 @@ CONTENT                                                *vimcommander-contents*
     Most of VimCommander's key-bindings are similar to the other
     commanders':
 
-    - TAB     = Go to the other panel;
-    - F3      = View file under cursor;
-    - F4      = Edit file under cursor;
-    - F5      = Copy file;
-    - F6      = Move/rename file;
-    - F7      = Create directory;
-    - F8/DEL  = Remove file;
-    - F10     = Quit VimCommander;
-    - C-R     = Refresh panels;
-    - C-U     = Exchange panels;
-    - C-Left  = Put directory under cursor on other panel, or grab
-              = other panel's dir;
-    - C-Right = Same;
-    - \H      = Show hidden files (toggle);
-    - INS     = Select file under cursor;
-    - "+"     = Select file by pattern;
-    - "-"     = De-select file by pattern;
-    - S-F4    = Edit new file;
-    - C-t     = Previous directory;
-    - C-y     = Next directory.
+    - TAB       = Go to the other panel.
+    - F3        = View file under cursor.
+    - F4        = Edit file under cursor.
+    - F5        = Copy file.
+    - F6        = Move/rename file.
+    - F7        = Create directory.
+    - F8/DEL    = Remove file.
+    - F10       = Quit VimCommander.
+    - C-R       = Refresh panels.
+	- Backspace = Go to parent directory.
+    - C-U       = Exchange panels.
+    - C-Left    = Put directory under cursor on other panel, or grab
+                  other panel's dir.
+    - C-Right   = Same.
+    - \H        = Show hidden files (toggle).
+    - INS       = Select file under cursor.
+    - "+"       = Select file by pattern.
+    - "-"       = De-select file by pattern.
+    - S-F4      = Edit new file.
+    - C-t       = Previous directory.
+    - C-y       = Next directory.
 
     C-* stands for CTRL+*. S-* stands for SHIFT+*.
     As some terminals do not support SHIFT/CTRL+non-letter-keys, a <leader>
