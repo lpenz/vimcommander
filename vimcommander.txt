@@ -88,7 +88,7 @@ CONTENT                                                *vimcommander-contents*
     - C-Left  = Put directory under cursor on other panel, or grab
               = other panel's dir;
     - C-Right = Same;
-    - C-H     = Toggle show hidden files;
+    - \H      = Show hidden files (toggle);
     - INS     = Select file under cursor;
     - "+"     = Select file by pattern;
     - "-"     = De-select file by pattern;

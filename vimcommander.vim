@@ -83,7 +83,6 @@ fu! <SID>CommanderMappings()
 	noremap <silent> <buffer> <leader>u        :cal <SID>ExchangeDirs()<CR>
 	noremap <silent> <buffer> <C-R>            :cal <SID>RefreshDisplays()<CR>
 	noremap <silent> <buffer> <leader>r        :cal <SID>RefreshDisplays()<CR>
-	noremap <silent> <buffer> <C-H>            :cal <SID>ShowHiddenFilesToggle()<CR>
 	noremap <silent> <buffer> <leader>h        :cal <SID>ShowHiddenFilesToggle()<CR>
 	"File-selection
 	noremap <silent> <buffer> <Insert>         :cal <SID>Select()<CR>
