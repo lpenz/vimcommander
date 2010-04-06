@@ -363,6 +363,11 @@ fu! <SID>FileView()
 	let opt=""
 	while strlen(name)>0
 		if filereadable(filename)
+      if has("unix")
+			  cal system("(see ".shellescape(filename).") &")
+      else
+      echo filename
+        exec "silent ! start \"\" \"".substitute(filename, "/", "\\", "g")."\""
 			cal system("(see ".shellescape(filename).") &")
 		en
 		if strlen(b:vimcommander_selected)>0
