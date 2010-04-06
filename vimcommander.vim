@@ -366,9 +366,8 @@ fu! <SID>FileView()
       if has("unix")
 			  cal system("(see ".shellescape(filename).") &")
       else
-      echo filename
         exec "silent ! start \"\" \"".substitute(filename, "/", "\\", "g")."\""
-			cal system("(see ".shellescape(filename).") &")
+      endif
 		en
 		if strlen(b:vimcommander_selected)>0
 			let name=<SID>SelectedNum(b:vimcommander_selected, i)
