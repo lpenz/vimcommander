@@ -22,7 +22,7 @@
 "               Oleg Popov <dev-random at mail dot ru>, fix for browsing
 "                    hidden files.
 "               Lajos Zaccomer <lajos@zaccomer.org>, custom starting paths,
-"                    change dir dialog.
+"                    change dir dialog, windows fixes, etc.
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Section: Documentation 
@@ -363,11 +363,11 @@ fu! <SID>FileView()
 	let opt=""
 	while strlen(name)>0
 		if filereadable(filename)
-      if has("unix")
-			  cal system("(see ".shellescape(filename).") &")
-      else
-        exec "silent ! start \"\" \"".substitute(filename, "/", "\\", "g")."\""
-      endif
+			if has("unix")
+				cal system("(see ".shellescape(filename).") &")
+			else
+				exec "silent ! start \"\" \"".substitute(filename, "/", "\\", "g")."\""
+			endif
 		en
 		if strlen(b:vimcommander_selected)>0
 			let name=<SID>SelectedNum(b:vimcommander_selected, i)
