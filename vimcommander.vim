@@ -23,6 +23,8 @@
 "                    hidden files.
 "               Lajos Zaccomer <lajos@zaccomer.org>, custom starting paths,
 "                    change dir dialog, windows fixes, etc.
+"               Zoltan Dezso <dezso.zoltan@gmail.co>, windows fix for parent
+"                    directory traversal, add total commander-like C-PageUp
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Section: Documentation 
@@ -108,6 +110,10 @@ fu! <SID>CommanderMappings()
 	"ChangeDir dialog, required in windows:
 	noremap <silent> <buffer> <leader>c        :cal <SID>ChangeDir()<CR>
 	noremap <silent> <buffer> cd               :cal <SID>ChangeDir()<CR>
+    
+	"Directory Up/Down
+	noremap <silent> <buffer> <C-PageUp>       :cal <SID>BuildParentTree()<CR>
+	noremap <silent> <buffer> <C-PageDown>     :cal <SID>OnDoubleClick()<CR>
 endf
 
 fu! VimCommanderToggle()
@@ -1011,9 +1017,13 @@ fu! <SID>FileSee()
 endf
 
 fu! <SID>BuildParentTree()
-	norm! gg$F/
+	if has("unix")
+		norm! gg$F/
+	else
+		norm! gg$F\
+	end
 	let mydir=getline(line('.'))
-	let mypos="^..+".strpart(mydir, strridx(mydir,'/')+1)."$"
+	let mypos="^..+".strpart(mydir, strridx(mydir,s:slash_char)+1)."$"
 	cal <SID>OnDoubleClick()
 	call search(mypos)
 	norm! 4|
