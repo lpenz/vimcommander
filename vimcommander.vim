@@ -8,13 +8,13 @@
 " Licence:      This program is free software; you can redistribute it
 "                   and/or modify it under the terms of the GNU General Public
 "                   License.  See http://www.gnu.org/copyleft/gpl.txt
-" Credits:      Patrick Schiel, the author of Opsplorer.vim 
+" Credits:      Patrick Schiel, the author of Opsplorer.vim
 "                   (http://www.vim.org/scripts/script.php?script_id=362)
 "                   in which this script is based,
 "               Christian Ghisler, the author of Total Commander, for the best
 "                   *-commander around. (http://www.ghisler.com)
 "               Mathieu Clabaut <mathieu.clabaut at free dot fr>, the author
-"                    of vimspell, from where I got how to autogenerate the 
+"                    of vimspell, from where I got how to autogenerate the
 "                    help from within the script.
 "               Diego Morales, fixes and suggestions.
 "               Vladimír Marek <vlmarek at volny dot cz>, fix for files with
@@ -27,7 +27,7 @@
 "                    directory traversal, add total commander-like C-PageUp
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Section: Documentation 
+" Section: Documentation
 "
 " Documentation should be available by ":help vimcommander" command, once the
 " script has been copied in you .vim/plugin directory.
@@ -110,7 +110,7 @@ fu! <SID>CommanderMappings()
 	"ChangeDir dialog, required in windows:
 	noremap <silent> <buffer> <leader>c        :cal <SID>ChangeDir()<CR>
 	noremap <silent> <buffer> cd               :cal <SID>ChangeDir()<CR>
-    
+
 	"Directory Up/Down
 	noremap <silent> <buffer> <C-PageUp>       :cal <SID>BuildParentTree()<CR>
 	noremap <silent> <buffer> <C-PageDown>     :cal <SID>OnDoubleClick()<CR>
@@ -228,7 +228,7 @@ endf
 fu! <SID>Close()
 	autocmd! BufEnter VimCommanderLeft
 	autocmd! BufEnter VimCommanderRight
-	autocmd! BufWinLeave VimCommanderLeft 
+	autocmd! BufWinLeave VimCommanderLeft
 	autocmd! BufWinLeave VimCommanderRight
 	let winnum = bufwinnr(s:bufnr_left)
 	if winnum != -1
@@ -493,7 +493,7 @@ fu! <SID>DirCreate()
 	end
 	if isdirectory(newdir)
 		echo "Directory already exists."
-		return 
+		return
 	end
 	let i=system("mkdir ".shellescape(<SID>MyPath().newdir))
 	cal <SID>RefreshDisplays()
@@ -822,7 +822,7 @@ fu! <SID>Select()
 		let b:vimcommander_selected=tmp
 		setl ma
 		norm! |l
-		norm! s 
+		norm! s
 		setl noma
 		cal <SID>GotoNextEntry()
 	else " select
