@@ -475,34 +475,12 @@ fu! <SID>ProvideBuffer()
 endf
 
 fu! <SID>FileView()
-	let i=0
-	if strlen(b:vimcommander_selected)>0
-		let name=<SID>SelectedNum(b:vimcommander_selected, i)
-		let filename=<SID>MyPath().name
-		let i=i+1
-	else
-		let name=" "
-		let filename=<SID>PathUnderCursor()
+	let path=<SID>PathUnderCursor()
+	if(isdirectory(path))
+		return
 	end
-	let opt=""
-	while strlen(name)>0
-		if filereadable(filename)
-			if has("unix")
-				cal system("(see ".shellescape(filename).") &")
-			else
-				exec "silent ! start \"\" \"".substitute(filename, "/", "\\", "g")."\""
-			endif
-		en
-		if strlen(b:vimcommander_selected)>0
-			let name=<SID>SelectedNum(b:vimcommander_selected, i)
-			let filename=<SID>MyPath().name
-			let i=i+1
-		else
-			let name=""
-		end
-	endwhile
-	let b:vimcommander_selected=""
-	cal <SID>RefreshDisplays()
+	let s:buffer_to_load=path
+	exe "tab sview ".<SID>VimEscape(path)
 endf
 
 fu! <SID>FileEdit()
@@ -512,8 +490,8 @@ fu! <SID>FileEdit()
 	end
 	"cal <SID>ProvideBuffer()
 	let s:buffer_to_load=path
-	cal <SID>Close()
-	exe "edit ".<SID>VimEscape(path)
+	"cal <SID>Close()
+	exe "tabedit ".<SID>VimEscape(path)
 endf
 
 fu! <SID>NewFileEdit()
