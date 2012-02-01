@@ -2,7 +2,7 @@
 SOURCE += doc/vimcommander.txt
 SOURCE += plugin/vimcommander.vim
 PROGRAM_NAME = "vimcommander"
-PROGRAM_VERSION = "0.80"
+PROGRAM_VERSION = "0.81"
 NAME = $(patsubst "%",%,$(PROGRAM_NAME))
 VERS = $(patsubst "%",%,$(PROGRAM_VERSION))
 

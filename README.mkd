@@ -34,6 +34,7 @@ Vimcommander keys are mostly totalcommander's:
 - F6 - move
 - F7 - create dir
 - F8 - del
+- F9 - sshconnect
 - Others: C-U, C-Left/C-Right, C-R, BS, DEL, C-H, etc.
 - Selection of files/dirs also works: INS, +, -.
     Then copy/move/del selected files.

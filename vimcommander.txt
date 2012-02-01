@@ -82,6 +82,7 @@ CONTENT                                                *vimcommander-contents*
     - F6        = Move/rename file.
     - F7        = Create directory.
     - F8/DEL    = Remove file.
+    - F9        = SSH connect
     - F10       = Quit VimCommander.
     - C-R       = Refresh panels.
 	- Backspace = Go to parent directory.
