@@ -25,6 +25,7 @@
 "                    change dir dialog, windows fixes, etc.
 "               Zoltan Dezso <dezso.zoltan@gmail.co>, windows fix for parent
 "                    directory traversal, add total commander-like C-PageUp
+"               Denis <woofterrier@gmail.com>, for windows fixes.
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Section: Documentation
@@ -114,6 +115,10 @@ fu! <SID>CommanderMappings()
 	"Directory Up/Down
 	noremap <silent> <buffer> <C-PageUp>       :cal <SID>BuildParentTree()<CR>
 	noremap <silent> <buffer> <C-PageDown>     :cal <SID>OnDoubleClick()<CR>
+endf
+
+fu! <SID>MsDos(filename)
+   return substitute(shellescape(a:filename),'/','\\','g')
 endf
 
 fu! VimCommanderToggle()
@@ -603,7 +608,11 @@ fu! <SID>FileCopy(samedir)
 
 			if (do_copy)
 				" copy file
+              if has("unix")
 				cal system("cp -Rf ".shellescape(filename)." ".shellescape(newfilename))
+			  else
+                cal system("copy ".<SID>MsDos(filename)." ".<SID>MsDos(newfilename))
+              end
 			en
 		en
 		if strlen(b:vimcommander_selected)>0
@@ -677,7 +686,11 @@ fu! <SID>FileMove(rename)
 
 			if (do_move)
 				" move file
+              if has("unix")
 				cal system('mv '.shellescape(filename).' '.shellescape(newfilename))
+			  else
+                cal system('move '.<SID>MsDos(filename).' '.<SID>MsDos(newfilename))
+              end
 			en
 		en
 		if strlen(b:vimcommander_selected)>0
@@ -714,7 +727,15 @@ fu! <SID>FileDelete()
 				end
 			end
 			if opt=~"^[yYAa]$"
+              if has("unix")
 				cal system("rm -rf ".shellescape(filename))
+		      else
+                  if isdirectory(filename)
+                    cal system("rmdir /s /q ".<SID>MsDos(filename))
+                  else
+                    cal system("del /q ".<SID>MsDos(filename))
+                  end
+              end
 			en
 		en
 		if strlen(b:vimcommander_selected)>0
