@@ -22,7 +22,7 @@ vba: $(NAME)_$(VERS).vba
 
 
 $(NAME)_$(VERS).vba: $(SOURCE)
-	vim -X --cmd 'let g:plugin_name="$@"' -s build.vim > /dev/null
+	vim -X --cmd 'let g:plugin_name="$@"' -s build.vim
 
 
 clean:
