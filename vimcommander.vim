@@ -26,6 +26,7 @@
 "               Zoltan Dezso <dezso.zoltan@gmail.co>, windows fix for parent
 "                    directory traversal, add total commander-like C-PageUp
 "               Denis <woofterrier@gmail.com>, for windows fixes.
+"               Helmut Stiegler <helmut@stiegler.biz>, for cygwin fixes.
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Section: Documentation
@@ -117,6 +118,10 @@ fu! <SID>CommanderMappings()
 	noremap <silent> <buffer> <C-PageDown>     :cal <SID>OnDoubleClick()<CR>
 endf
 
+fu! <SID>ShallUseUnixCmds()
+	return has("unix") || exists('+shellslash') && &shellslash
+endf
+
 fu! <SID>MsDos(filename)
    return substitute(shellescape(a:filename),'/','\\','g')
 endf
@@ -134,7 +139,7 @@ fu! VimCommanderToggle()
 endf
 
 fu!<SID>First()
-  if has("unix")
+  if <SID>ShallUseUnixCmds()
     let s:slash_char = "/"
   else
     let s:slash_char = "\\"
@@ -374,7 +379,7 @@ fu! <SID>FileView()
 	let opt=""
 	while strlen(name)>0
 		if filereadable(filename)
-			if has("unix")
+			if <SID>ShallUseUnixCmds()
 				cal system("(see ".shellescape(filename).") &")
 			else
 				exec "silent ! start \"\" \"".substitute(filename, "/", "\\", "g")."\""
@@ -608,7 +613,7 @@ fu! <SID>FileCopy(samedir)
 
 			if (do_copy)
 				" copy file
-              if has("unix")
+              if <SID>ShallUseUnixCmds()
 				cal system("cp -Rf ".shellescape(filename)." ".shellescape(newfilename))
 			  else
                 cal system("copy ".<SID>MsDos(filename)." ".<SID>MsDos(newfilename))
@@ -686,7 +691,7 @@ fu! <SID>FileMove(rename)
 
 			if (do_move)
 				" move file
-              if has("unix")
+              if <SID>ShallUseUnixCmds()
 				cal system('mv '.shellescape(filename).' '.shellescape(newfilename))
 			  else
                 cal system('move '.<SID>MsDos(filename).' '.<SID>MsDos(newfilename))
@@ -727,7 +732,7 @@ fu! <SID>FileDelete()
 				end
 			end
 			if opt=~"^[yYAa]$"
-              if has("unix")
+              if <SID>ShallUseUnixCmds()
 				cal system("rm -rf ".shellescape(filename))
 		      else
                   if isdirectory(filename)
@@ -1038,7 +1043,7 @@ fu! <SID>FileSee()
 endf
 
 fu! <SID>BuildParentTree()
-	if has("unix")
+	if <SID>ShallUseUnixCmds()
 		norm! gg$F/
 	else
 		norm! gg$F\
@@ -1104,7 +1109,7 @@ fu! <SID>OnDoubleClick()
 		" we're on line 1 here! getting new base path now...
 		" advance to next slash
 		if getline(1)[xpos]!=s:slash_char
-      if has("unix")
+      if <SID>ShallUseUnixCmds()
 			  norm! f/
       else
         norm! f\
@@ -1128,7 +1133,7 @@ fu! <SID>ChangeDir()
   if l:path == ""
     let l:path = l:oldpath
   endif
-  if !has("unix")
+  if !<SID>ShallUseUnixCmds()
 	  let l:path = substitute(l:path,'\\','/','g')
   endif
 	cal <SID>BuildTree(l:path)
