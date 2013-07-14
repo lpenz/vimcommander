@@ -1,32 +1,21 @@
 
 SOURCE += doc/vimcommander.txt
 SOURCE += plugin/vimcommander.vim
-PROGRAM_NAME = "vimcommander"
-PROGRAM_VERSION = "0.81"
-NAME = $(patsubst "%",%,$(PROGRAM_NAME))
-VERS = $(patsubst "%",%,$(PROGRAM_VERSION))
+NAME := $(shell sed -n 's/.*PROGRAM_NAME *=\? *"\([^ ]\+\)".*/\1/p' plugin/vimcommander.vim | head -1)
+VERS := $(shell sed -n 's/.*PROGRAM_VERSION *=\? *"\([^ ]\+\)".*/\1/p' plugin/vimcommander.vim | head -1)
 
 
-all: $(SOURCE)
+all:
 
 
-doc/vimcommander.txt: vimcommander.txt
-	mkdir -p $(dir $@); sed 's/\$$VERSION/$(PROGRAM_VERSION)/g' $^ > $@
+vmb vba: $(NAME)_$(VERS).vmb
 
 
-plugin/vimcommander.vim: vimcommander.vim
-	mkdir -p $(dir $@); sed 's/\$$VERSION/$(PROGRAM_VERSION)/g' $^ > $@
-
-
-vba: $(NAME)_$(VERS).vba
-
-
-$(NAME)_$(VERS).vba: $(SOURCE)
-	vim -X --cmd 'let g:plugin_name="$@"' -s build.vim
+$(NAME)_$(VERS).vmb: $(SOURCE)
+	vim -X --cmd 'let g:plugin_name="$(NAME)_$(VERS)"' -s build.vim
 
 
 clean:
-	rm -f $(NAME)_$(VERS).vba $(SOURCE)
-	-rmdir doc plugin
+	rm -f $(NAME)_$(VERS).vba
 
 

@@ -32,17 +32,14 @@
 " Section: Documentation
 "
 " Documentation should be available by ":help vimcommander" command, once the
-" script has been copied in you .vim/plugin directory.
-"
-" If you do not want the documentation to be installed, just put
-" let b:vimcommander_install_doc=0
-" in your .vimrc, or uncomment the line above.
-"
-" The documentation is still available at the end of the script.
+" script has been installed.
 "
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Section: Code
 "
+
+" PROGRAM_NAME = "vimcommander"
+" PROGRAM_VERSION = "1.0"
 
 fu! <SID>CommanderMappings()
 	noremap <silent> <buffer> <LeftRelease> :cal <SID>OnClick()<CR>
