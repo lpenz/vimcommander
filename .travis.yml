@@ -1,0 +1,5 @@
+script: vim -e --noplugin -u /dev/null -c 'source plugin/vimcommander.vim | quit'
+before_install:
+ - sudo apt-get update -qq
+ - sudo apt-get install -qq vim
+
