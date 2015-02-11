@@ -41,78 +41,121 @@
 " PROGRAM_NAME = "vimcommander"
 " PROGRAM_VERSION = "1.0"
 
+noremap <silent> <unique> <Plug>VimCommanderBuildParentTree        :cal <SID>BuildParentTree()<CR>
+noremap <silent> <unique> <Plug>VimCommanderBuildTreeHome          :cal <SID>BuildTree("$HOME")<CR>
+noremap <silent> <unique> <Plug>VimCommanderBuildTreeRoot          :cal <SID>BuildTree("/")<CR>
+noremap <silent> <unique> <Plug>VimCommanderChangeDir              :cal <SID>ChangeDir()<CR>
+noremap <silent> <unique> <Plug>VimCommanderDeSelectPatternAsk     :cal <SID>DeSelectPatternAsk()<CR>
+noremap <silent> <unique> <Plug>VimCommanderDeSelectPattern        :cal <SID>DeSelectPattern('*')<CR>
+noremap <silent> <unique> <Plug>VimCommanderDirCreate              :cal <SID>DirCreate()<CR>
+noremap <silent> <unique> <Plug>VimCommanderExchangeDirs           :cal <SID>ExchangeDirs()<CR>
+noremap <silent> <unique> <Plug>VimCommanderFileCopy_0             :cal <SID>FileCopy(0)<CR>
+noremap <silent> <unique> <Plug>VimCommanderFileCopy_1             :cal <SID>FileCopy(1)<CR>
+noremap <silent> <unique> <Plug>VimCommanderFileDelete             :cal <SID>FileDelete()<CR>
+noremap <silent> <unique> <Plug>VimCommanderFileEdit               :cal <SID>FileEdit()<CR>
+noremap <silent> <unique> <Plug>VimCommanderFileMove_0             :cal <SID>FileMove(0)<CR>
+noremap <silent> <unique> <Plug>VimCommanderFileMove_1             :cal <SID>FileMove(1)<CR>
+noremap <silent> <unique> <Plug>VimCommanderFileView               :cal <SID>FileView()<CR>
+noremap <silent> <unique> <Plug>VimCommanderGetOrPutDir_l          :cal <SID>GetOrPutDir('l')<CR>
+noremap <silent> <unique> <Plug>VimCommanderGetOrPutDir_r          :cal <SID>GetOrPutDir('r')<CR>
+noremap <silent> <unique> <Plug>VimCommanderGotoNextEntry          :cal <SID>GotoNextEntry()
+noremap <silent> <unique> <Plug>VimCommanderGotoNextNode           :cal <SID>GotoNextNode()<CR>
+noremap <silent> <unique> <Plug>VimCommanderGotoPrevEntry          :cal <SID>GotoPrevEntry()
+noremap <silent> <unique> <Plug>VimCommanderGotoPrevNode           :cal <SID>GotoPrevNode()<CR>
+noremap <silent> <unique> <Plug>VimCommanderNewFileEdit            :cal <SID>NewFileEdit()<CR>
+noremap <silent> <unique> <Plug>VimCommanderNextDir                :cal <SID>NextDir()<CR>
+noremap <silent> <unique> <Plug>VimCommanderPrevDir                :cal <SID>PrevDir()<CR>
+noremap <silent> <unique> <Plug>VimCommanderPutDir                 :cal <SID>PutDir()<CR>
+noremap <silent> <unique> <Plug>VimCommanderRefreshDisplays        :cal <SID>RefreshDisplays()<CR>
+noremap <silent> <unique> <Plug>VimCommanderSelect                 :cal <SID>Select()<CR>
+noremap <silent> <unique> <Plug>VimCommanderSelectPatternAsk       :cal <SID>SelectPatternAsk()<CR>
+noremap <silent> <unique> <Plug>VimCommanderSelectPattern          :cal <SID>SelectPattern('*')<CR>
+noremap <silent> <unique> <Plug>VimCommanderSetMatchPattern        :cal <SID>SetMatchPattern()<CR>
+noremap <silent> <unique> <Plug>VimCommanderShowHiddenFilesToggle  :cal <SID>ShowHiddenFilesToggle()<CR>
+noremap <silent> <unique> <Plug>VimCommanderSwitchBuffer           :cal <SID>SwitchBuffer()<CR>
+noremap <silent> <unique> <Plug>VimCommanderSwitchOnClick          :cal <SID>OnClick()<CR>
+noremap <silent> <unique> <Plug>VimCommanderSwitchOnDoubleClick    :cal <SID>OnDoubleClick()<CR>
+noremap <silent> <unique> <Plug>VimCommanderToggle                 :cal VimCommanderToggle()<CR>
+
 fu! <SID>CommanderMappings()
-	noremap <silent> <buffer> <LeftRelease> :cal <SID>OnClick()<CR>
-	noremap <silent> <buffer> <2-LeftMouse> :cal <SID>OnDoubleClick()<CR>
-	noremap <silent> <buffer> <CR> :cal <SID>OnDoubleClick()<CR>
-	noremap <silent> <buffer> <Down> :cal <SID>GotoNextEntry()<CR>
-	noremap <silent> <buffer> <Up> :cal <SID>GotoPrevEntry()<CR>
-	noremap <silent> <buffer> <S-Down> :cal <SID>GotoNextNode()<CR>
-	noremap <silent> <buffer> <S-Up> :cal <SID>GotoPrevNode()<CR>
-	noremap <silent> <buffer> <BS> :cal <SID>BuildParentTree()<CR>
+	map <silent> <buffer> <LeftRelease>    <Plug>VimCommanderOnClick
+	map <silent> <buffer> <Insert>         <Plug>VimCommanderSelect
+	map <silent> <buffer> <LeftRelease>    <Plug>VimCommanderOnClick
+	map <silent> <buffer> <2-LeftMouse>    <Plug>VimCommanderSwitchOnDoubleClick
+	map <silent> <buffer> <CR>             <Plug>VimCommanderSwitchOnDoubleClick
+	map <silent> <buffer> <Down>           <Plug>VimCommanderGotoNextEntry
+	map <silent> <buffer> <Up>             <Plug>VimCommanderGotoPrevEntry
+	map <silent> <buffer> <S-Down>         <Plug>VimCommanderGotoNextNode
+	map <silent> <buffer> <S-Up>           <Plug>VimCommanderGotoPrevNode
+	map <silent> <buffer> <BS>             <Plug>VimCommanderGotoPrevNode
 
 	"total-cmd keys:
-	noremap <silent> <buffer> <TAB>            :cal <SID>SwitchBuffer()<CR>
-	noremap <silent> <buffer> <C-\>            :cal <SID>BuildTree("$HOME")<CR>
-	noremap <silent> <buffer> <C-/>            :cal <SID>BuildTree("/")<CR>
-	noremap <silent> <buffer> <leader>/        :cal <SID>BuildTree("/")<CR>
+	map <silent> <buffer> <TAB>            <Plug>VimCommanderSwitchBuffer
+	map <silent> <buffer> <C-\>            <Plug>VimCommanderBuildTreeHome
+	map <silent> <buffer> <C-/>            <Plug>VimCommanderBuildTreeRoot
+	map <silent> <buffer> <leader>/        <Plug>VimCommanderBuildTreeRoot
 	"F-keys and aliases:
-	noremap <silent> <buffer> <F3>             :cal <SID>FileView()<CR>
-	noremap <silent> <buffer> <F4>             :cal <SID>FileEdit()<CR>
-	noremap <silent> <buffer> <S-F4>           :cal <SID>NewFileEdit()<CR>
-	noremap <silent> <buffer> <leader><F4>     :cal <SID>NewFileEdit()<CR>
-	noremap <silent> <buffer> <leader>n        :cal <SID>NewFileEdit()<CR>
-	noremap <silent> <buffer> <F5>             :cal <SID>FileCopy(0)<CR>
-	noremap <silent> <buffer> <S-F5>           :cal <SID>FileCopy(1)<CR>
-	noremap <silent> <buffer> <F6>             :cal <SID>FileMove(0)<CR>
-	noremap <silent> <buffer> <S-F6>           :cal <SID>FileMove(1)<CR>
-	noremap <silent> <buffer> <F7>             :cal <SID>DirCreate()<CR>
-	noremap <silent> <buffer> <F8>             :cal <SID>FileDelete()<CR>
-	noremap <silent> <buffer> <DEL>            :cal <SID>FileDelete()<CR>
-	noremap <silent> <buffer> <F10>            :cal VimCommanderToggle()<CR>
-	noremap <silent> <buffer> <F11>            :cal VimCommanderToggle()<CR>
+	map <silent> <buffer> <F3>             <Plug>VimCommanderFileView
+	map <silent> <buffer> <F4>             <Plug>VimCommanderFileEdit
+	map <silent> <buffer> <S-F4>           <Plug>VimCommanderFileEdit
+	map <silent> <buffer> <leader><F4>     <Plug>VimCommanderFileEdit
+	map <silent> <buffer> <leader>n        <Plug>VimCommanderFileEdit
+	map <silent> <buffer> <F5>             <Plug>VimCommanderFileCopy_0
+	map <silent> <buffer> <S-F5>           <Plug>VimCommanderFileCopy_1
+	map <silent> <buffer> <F6>             <Plug>VimCommanderFileMove_0
+	map <silent> <buffer> <S-F6>           <Plug>VimCommanderFileMove_1
+	map <silent> <buffer> <F7>             <Plug>VimCommanderDirCreate
+	map <silent> <buffer> <F8>             <Plug>VimCommanderFileDelete
+	map <silent> <buffer> <DEL>            <Plug>VimCommanderFileDelete
+	map <silent> <buffer> <F10>            <Plug>VimCommanderToggle
+	map <silent> <buffer> <F11>            <Plug>VimCommanderToggle
 	"Panel-dirs
-	noremap <silent> <buffer> <leader><Left>   :cal <SID>GetOrPutDir('l')<CR>
-	noremap <silent> <buffer> <leader><Right>  :cal <SID>GetOrPutDir('r')<CR>
-	noremap <silent> <buffer> <C-Left>         :cal <SID>GetOrPutDir('l')<CR>
-	noremap <silent> <buffer> <C-Right>        :cal <SID>GetOrPutDir('r')<CR>
-	noremap <silent> <buffer> <S-Left>         :cal <SID>GetOrPutDir('l')<CR>
-	noremap <silent> <buffer> <S-Right>        :cal <SID>GetOrPutDir('r')<CR>
-	noremap <silent> <buffer> <leader>o        :cal <SID>PutDir()<CR>
-	noremap <silent> <buffer> <M-O>            :cal <SID>PutDir()<CR>
-	noremap <silent> <buffer> <C-U>            :cal <SID>ExchangeDirs()<CR>
-	noremap <silent> <buffer> <leader>u        :cal <SID>ExchangeDirs()<CR>
-	noremap <silent> <buffer> <C-R>            :cal <SID>RefreshDisplays()<CR>
-	noremap <silent> <buffer> <leader>r        :cal <SID>RefreshDisplays()<CR>
-	noremap <silent> <buffer> <leader>h        :cal <SID>ShowHiddenFilesToggle()<CR>
+	map <silent> <buffer> <leader><Left>   <Plug>VimCommanderGetOrPutDir_l
+	map <silent> <buffer> <leader><Right>  <Plug>VimCommanderGetOrPutDir_r
+	map <silent> <buffer> <C-Left>         <Plug>VimCommanderGetOrPutDir_l
+	map <silent> <buffer> <C-Right>        <Plug>VimCommanderGetOrPutDir_r
+	map <silent> <buffer> <S-Left>         <Plug>VimCommanderGetOrPutDir_l
+	map <silent> <buffer> <S-Right>        <Plug>VimCommanderGetOrPutDir_r
+	map <silent> <buffer> <leader>o        <Plug>VimCommanderPutDir
+	map <silent> <buffer> <M-O>            <Plug>VimCommanderPutDir
+	map <silent> <buffer> <C-U>            <Plug>VimCommanderExchangeDirs
+	map <silent> <buffer> <leader>u        <Plug>VimCommanderExchangeDirs
+	map <silent> <buffer> <C-R>            <Plug>VimCommanderRefreshDisplays
+	map <silent> <buffer> <leader>r        <Plug>VimCommanderRefreshDisplays
+	map <silent> <buffer> <leader>h        <Plug>VimCommanderShowHiddenFilesToggle
 	"File-selection
-	noremap <silent> <buffer> <Insert>         :cal <SID>Select()<CR>
-	noremap <silent> <buffer> <C-kPlus>        :cal <SID>SelectPattern('*')<CR>
-	noremap <silent> <buffer> <leader><kPlus>  :cal <SID>SelectPattern('*')<CR>
-	noremap <silent> <buffer> <leader><kMinus> :cal <SID>DeSelectPattern('*')<CR>
-	noremap <silent> <buffer> <kPlus>          :cal <SID>SelectPatternAsk()<CR>
-	noremap <silent> <buffer> <kMinus>         :cal <SID>DeSelectPatternAsk()<CR>
-	noremap <silent> <buffer> +                :cal <SID>SelectPatternAsk()<CR>
-	noremap <silent> <buffer> -                :cal <SID>DeSelectPatternAsk()<CR>
+	map <silent> <buffer> <C-kPlus>        <Plug>VimCommanderSelectPattern
+	map <silent> <buffer> <leader><kPlus>  <Plug>VimCommanderSelectPattern
+	map <silent> <buffer> <leader><kMinus> <Plug>VimCommanderDeSelectPattern
+	map <silent> <buffer> <kPlus>          <Plug>VimCommanderSelectPatternAsk
+	map <silent> <buffer> <kMinus>         <Plug>VimCommanderDeSelectPatternAsk
+	map <silent> <buffer> +                <Plug>VimCommanderSelectPatternAsk
+	map <silent> <buffer> -                <Plug>VimCommanderDeSelectPatternAsk
 	"Dir history
-	noremap <silent> <buffer> <C-t>            :cal <SID>PrevDir()<CR>
-	noremap <silent> <buffer> <leader>t        :cal <SID>PrevDir()<CR>
-	noremap <silent> <buffer> <C-y>            :cal <SID>NextDir()<CR>
-	noremap <silent> <buffer> <leader>y        :cal <SID>NextDir()<CR>
+	map <silent> <buffer> <C-t>            <Plug>VimCommanderPrevDir
+	map <silent> <buffer> <leader>t        <Plug>VimCommanderPrevDir
+	map <silent> <buffer> <C-y>            <Plug>VimCommanderNextDir
+	map <silent> <buffer> <leader>y        <Plug>VimCommanderNextDir
 
 	"Misc (some are Opsplorer's)
-	noremap <silent> <buffer> <C-F11>          :cal <SID>SetMatchPattern()<CR>
-	noremap <silent> <buffer> <leader><F11>    :cal <SID>SetMatchPattern()<CR>
-	"noremap <silent> <buffer> <C-O>            :cal VimCommanderToggle()<CR>
-	"noremap <silent> <buffer> <leader>o        :cal VimCommanderToggle()<CR>
+	map <silent> <buffer> <C-F11>          <Plug>VimCommanderSetMatchPattern
+	map <silent> <buffer> <leader><F11>    <Plug>VimCommanderSetMatchPattern
+	"map <silent> <buffer> <C-O>            <Plug>VimCommanderToggle
+	"map <silent> <buffer> <leader>o        <Plug>VimCommanderToggle
 
 	"ChangeDir dialog, required in windows:
-	noremap <silent> <buffer> <leader>c        :cal <SID>ChangeDir()<CR>
-	noremap <silent> <buffer> cd               :cal <SID>ChangeDir()<CR>
+	map <silent> <buffer> <leader>c        <Plug>VimCommanderChangeDir
+	map <silent> <buffer> cd               <Plug>VimCommanderChangeDir
 
 	"Directory Up/Down
-	noremap <silent> <buffer> <C-PageUp>       :cal <SID>BuildParentTree()<CR>
-	noremap <silent> <buffer> <C-PageDown>     :cal <SID>OnDoubleClick()<CR>
+	map <silent> <buffer> <C-PageUp>       <Plug>VimCommanderBuildParentTree
+	map <silent> <buffer> <C-PageDown>     <Plug>VimCommanderSwitchOnDoubleClick
+endf
+
+fu! <SID>CustomMappings()
+	if filereadable(expand("~/.vimcommander.custom"))
+		source ~/.vimcommander.custom
+	endif
 endf
 
 fu! <SID>ShallUseUnixCmds()
@@ -183,6 +226,7 @@ fu! <SID>VimCommanderShow()
 	" setup mappings, apply options, colors and draw tree
 	cal <SID>InitCommanderOptions()
 	cal <SID>CommanderMappings()
+	cal <SID>CustomMappings()
 	cal <SID>InitCommanderColors()
 	cal <SID>BuildTree(s:path_right)
 	cal <SID>GotoEntry(s:line_right)
@@ -191,6 +235,7 @@ fu! <SID>VimCommanderShow()
 	let &l:splitright = s:split_tmp
 	cal <SID>InitCommanderOptions()
 	cal <SID>CommanderMappings()
+	cal <SID>CustomMappings()
 	cal <SID>InitCommanderColors()
 	cal <SID>BuildTree(s:path_left)
 	cal <SID>GotoEntry(s:line_left)
