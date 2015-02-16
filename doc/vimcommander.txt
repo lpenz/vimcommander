@@ -82,7 +82,7 @@ CONTENT                                                *vimcommander-contents*
     - F8/DEL    = Remove file.
     - F10       = Quit VimCommander.
     - C-R       = Refresh panels.
-	- Backspace = Go to parent directory.
+    - Backspace = Go to parent directory.
     - C-U       = Exchange panels.
     - C-Left    = Put directory under cursor on other panel, or grab
                   other panel's dir.
@@ -100,6 +100,54 @@ CONTENT                                                *vimcommander-contents*
     version has usually been provided.
     So, <leader>Right and C-Right are the same.
     Same for M-keys, including letters.
+
+    User can redefine keys (in VimCommander's buffer) by adding them in a
+    ~/.vimcommander.custom file using the existing |vimcommander-key-hooks|.
+
+    For example to remap the select action to the 't' key just add
+
+        nmap <buffer> t   <Plug>VimCommanderSelect
+
+    to the .vimcommander.custom file
+
+4.1 List of key hooks                                  *vimcommander-key-hooks*
+---------------------
+
+    - VimCommanderBuildParentTree
+    - VimCommanderBuildTreeHome
+    - VimCommanderBuildTreeRoot
+    - VimCommanderChangeDir
+    - VimCommanderDeSelectPatternAsk
+    - VimCommanderDeSelectPattern
+    - VimCommanderDirCreate
+    - VimCommanderExchangeDirs
+    - VimCommanderFileCopy_0
+    - VimCommanderFileCopy_1
+    - VimCommanderFileDelete
+    - VimCommanderFileEdit
+    - VimCommanderFileMove_0
+    - VimCommanderFileMove_1
+    - VimCommanderFileView
+    - VimCommanderGetOrPutDir_l
+    - VimCommanderGetOrPutDir_r
+    - VimCommanderGotoNextEntry
+    - VimCommanderGotoNextNode
+    - VimCommanderGotoPrevEntry
+    - VimCommanderGotoPrevNode
+    - VimCommanderNewFileEdit
+    - VimCommanderNextDir
+    - VimCommanderPrevDir
+    - VimCommanderPutDir
+    - VimCommanderRefreshDisplays
+    - VimCommanderSelect
+    - VimCommanderSelectPatternAsk
+    - VimCommanderSelectPattern
+    - VimCommanderSetMatchPattern
+    - VimCommanderShowHiddenFilesToggle
+    - VimCommanderSwitchBuffer
+    - VimCommanderSwitchOnClick
+    - VimCommanderSwitchOnDoubleClick
+    - VimCommanderToggle
 
 ==============================================================================
 5. VimCommander Todo                                       *vimcommander-todo*
