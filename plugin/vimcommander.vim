@@ -87,7 +87,7 @@ fu! <SID>CommanderMappings()
 	map <silent> <buffer> <Up>             <Plug>VimCommanderGotoPrevEntry
 	map <silent> <buffer> <S-Down>         <Plug>VimCommanderGotoNextNode
 	map <silent> <buffer> <S-Up>           <Plug>VimCommanderGotoPrevNode
-	map <silent> <buffer> <BS>             <Plug>VimCommanderGotoPrevNode
+	map <silent> <buffer> <BS>             <Plug>VimCommanderBuildParentTree
 
 	"total-cmd keys:
 	map <silent> <buffer> <TAB>            <Plug>VimCommanderSwitchBuffer
