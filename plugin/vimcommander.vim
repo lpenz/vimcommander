@@ -41,6 +41,12 @@
 " PROGRAM_NAME = "vimcommander"
 " PROGRAM_VERSION = "1.0"
 
+" Check if we should continue loading
+if exists("g:loaded_vimcommander")
+    finish
+endif
+let g:loaded_vimcommander = 1
+
 noremap <silent> <unique> <Plug>VimCommanderBuildParentTree        :cal <SID>BuildParentTree()<CR>
 noremap <silent> <unique> <Plug>VimCommanderBuildTreeHome          :cal <SID>BuildTree("$HOME")<CR>
 noremap <silent> <unique> <Plug>VimCommanderBuildTreeRoot          :cal <SID>BuildTree("/")<CR>
