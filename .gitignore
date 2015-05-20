@@ -1,4 +1,2 @@
-*.vba
-doc/
-plugin/
-
+*.vmb
+/doc/tags
