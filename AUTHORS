@@ -29,6 +29,7 @@ Oleg Popov <dev-random at mail dot ru>, fix for browsing
      hidden files.
 Lajos Zaccomer <lajos@zaccomer.org>, custom starting paths,
      change dir dialog and Windows path handling fixes.
+Alukardd, the author of SHHConnect function (based on sshfs util).
 
 
 Thanks go to:

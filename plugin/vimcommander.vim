@@ -172,6 +172,123 @@ fu! <SID>MsDos(filename)
    return substitute(shellescape(a:filename),'/','\\','g')
 endf
 
+fu! <SID>SSHConnect()
+	" Created by <Alukardd>
+	"
+	let g:ssh_dir_list = "/tmp/ssh_dir.list"
+	cal system("which sshfs")
+ 	if v:shell_error
+		echo "You should install sshfs utility previously to use this function!"
+		return
+	endif
+
+	" readfile is called every time that there were no problems in parallel using the function
+	if !filereadable(g:ssh_dir_list)
+		cal writefile([],g:ssh_dir_list)
+	endif
+
+	let start_ssh = 1
+	while start_ssh == 1
+		let action = input("What are you want to do (mount/dismount/abort) sshfs? [mda]: ")
+		if action == "a"
+			echo "SSHConnect aborted by keystroke."
+			let start_ssh = 0
+		elseif action == "d"
+			if readfile(g:ssh_dir_list) == []
+				echo "No remote host mounted!"
+			else
+				if readfile(g:ssh_dir_list) == [""]
+					echo "No remote host mounted!"
+				else
+					echo "Choose which mount point you want to dismont: ".readfile(g:ssh_dir_list)[0]
+					let ans = input("Enter sequence number of choosen moint point: ")
+					if ans =~ '^\d\{1,2\}$'
+						if ans > system("gawk -F\\; '{print NF}' ".g:ssh_dir_list)
+							echo "Number out of bound!"
+							return
+						endif
+						let ssh_udir = system("gawk -F\\; '{gsub(/\\([^)]*\\)/,\"\",$".ans."); printf $".ans."}' ".g:ssh_dir_list)
+						let ssh_udir_name = system("gawk -F\\; '{printf $".ans."}' ".g:ssh_dir_list)
+						cal system("fusermount -u ".ssh_udir)
+						cal system("rm -rf ".shellescape(ssh_udir))
+						" here may be do substitute + readfile + writefile, but i decided to use sed
+						cal system("sed --in-place 's/;\\?".escape(ssh_udir_name,'/')."//;s/^;//' ".g:ssh_dir_list)
+						cal <SID>RefreshDisplays()
+						echo ssh_udir_name." dismounted."
+					else
+						echo "You're failed."
+					endif
+				endif
+			endif
+			let start_ssh = 0
+		elseif action == "m"
+			let start_ssh = 0
+			let cmd = input("Enter remote host address ([identity,][user@]host[:port]): ")
+			if cmd == ""
+				cal <SID>RefreshDisplays()
+				return
+			else
+				exe "set magic"
+
+				let ssh_cmd = "sshfs "
+				let options_line = ""
+
+				" validate ssh address
+				if cmd !~ '^\([^,]\+,\|\)\([^@,:]\+@\|\)\([^@,:]\+\)\(:\d\{1,5\}\|\)$'
+					echo "Invalid address! You type: ".cmd
+					return
+				end
+
+				" parse connect string
+				let Identity = substitute(cmd,'^\([^,]*,\).*$','\1','')
+				let User = substitute(cmd,'^\([^,]\+,\|\)\([^@,:]\+@\|\)\([^@,:]\+\)\(:\d\{1,5\}\|\)$','\2','')
+				let Host = substitute(cmd,'^\([^,]\+,\|\)\([^@,:]\+@\|\)\([^@,:]\+\)\(:\d\{1,5\}\|\)$','\3','')
+				let Port = substitute(cmd,'^[^:]*:\?\([[:digit:]]\{0,5\}\)$','\1','')
+
+				if Identity != cmd
+					"let Identity = ""
+				"else
+					let Identity = substitute(Identity,",","","")
+					let options_line = "-o IdentityFile=\"".Identity."\""
+				end
+				if User == cmd
+					let User = ""
+				end
+				if Port != ""
+					if options_line == ""
+						let options_line = "-o Port=".Port
+					else
+						let options_line = options_line.",Port=".Port
+					endif
+				end
+				
+				" Create tmp dir for new mount
+				let ssh_dir = "/tmp/".system("cat /dev/urandom | tr -dc A-Za-z0-9 | head -c 12")
+				cal system("mkdir ".shellescape(ssh_dir))
+
+				" try to mount
+				let ssh_cmd = ssh_cmd.options_line." ".User.Host.":/ ".shellescape(ssh_dir)
+				cal system(ssh_cmd)
+			 	if !v:shell_error
+					if readfile(g:ssh_dir_list) == []
+						call writefile([ssh_dir."(".Host.")"],g:ssh_dir_list)
+					else
+						if readfile(g:ssh_dir_list) == [""]
+							call writefile([ssh_dir."(".Host.")"],g:ssh_dir_list)
+						else
+							call writefile([readfile(g:ssh_dir_list)[0].";".ssh_dir."(".Host.")"],g:ssh_dir_list)
+						endif
+					end
+					cal <SID>BuildTree(ssh_dir)
+					cal <SID>RefreshDisplays()
+				else
+					echo "Failed connect to host.\nYou try: ".ssh_cmd
+				endif
+			endif
+		endif
+	endwhile
+endf
+
 fu! VimCommanderToggle()
 	if exists("g:vimcommander_loaded")
 		if(g:vimcommander_loaded==1) " its on screen - close
@@ -415,14 +532,9 @@ fu! <SID>ProvideBuffer()
 endf
 
 fu! <SID>FileView()
-	let i=0
-	if strlen(b:vimcommander_selected)>0
-		let name=<SID>SelectedNum(b:vimcommander_selected, i)
-		let filename=<SID>MyPath().name
-		let i=i+1
-	else
-		let name=" "
-		let filename=<SID>PathUnderCursor()
+	let path=<SID>PathUnderCursor()
+	if(isdirectory(path))
+		return
 	end
 	let opt=""
 	while strlen(name)>0
@@ -452,8 +564,8 @@ fu! <SID>FileEdit()
 	end
 	"cal <SID>ProvideBuffer()
 	let s:buffer_to_load=path
-	cal <SID>Close()
-	exe "edit ".<SID>VimEscape(path)
+	"cal <SID>Close()
+	exe "tabedit ".<SID>VimEscape(path)
 endf
 
 fu! <SID>NewFileEdit()

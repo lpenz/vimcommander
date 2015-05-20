@@ -1,4 +1,3 @@
-
 SOURCE += doc/vimcommander.txt
 SOURCE += plugin/vimcommander.vim
 NAME := $(shell sed -n 's/.*PROGRAM_NAME *=\? *"\([^ ]\+\)".*/\1/p' plugin/vimcommander.vim | head -1)
@@ -17,5 +16,3 @@ $(NAME)_$(VERS).vmb: $(SOURCE)
 
 clean:
 	rm -f $(NAME)_$(VERS).vba
-
-
