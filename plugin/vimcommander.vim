@@ -89,8 +89,8 @@ fu! <SID>CommanderMappings()
 	map <silent> <buffer> <LeftRelease>    <Plug>VimCommanderOnClick
 	map <silent> <buffer> <2-LeftMouse>    <Plug>VimCommanderSwitchOnDoubleClick
 	map <silent> <buffer> <CR>             <Plug>VimCommanderSwitchOnDoubleClick
-	map <silent> <buffer> <Down>           <Plug>VimCommanderGotoNextEntry
-	map <silent> <buffer> <Up>             <Plug>VimCommanderGotoPrevEntry
+	map <silent> <buffer> <Down>           <Plug>VimCommanderGotoNextEntry<CR>
+	map <silent> <buffer> <Up>             <Plug>VimCommanderGotoPrevEntry<CR>
 	map <silent> <buffer> <S-Down>         <Plug>VimCommanderGotoNextNode
 	map <silent> <buffer> <S-Up>           <Plug>VimCommanderGotoPrevNode
 	map <silent> <buffer> <BS>             <Plug>VimCommanderBuildParentTree
